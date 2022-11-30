@@ -18,8 +18,10 @@ const io = new Server(server, {
 
 io.on('connection', (socket) => {
     console.log('New Socket: ', socket.id)
+    io.emit('test')
     socket.on('disconnect', () => {
         console.log('Socket Closed: ', socket.id)
+        io.emit('disc')
     })
 })
 
