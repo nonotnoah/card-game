@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
-import reactLogo from './assets/react.svg'
-import './App.css'
+import './styles/App.css'
 import { io } from 'socket.io-client'
 
 function App() {
