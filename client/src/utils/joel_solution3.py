@@ -76,7 +76,8 @@ def make_deck(n, pics):
 
         # lines.append(cards)
         map_obj = map(mapping.get, line)
-        lines.append(list(map_obj))
+        list_obj = list(map_obj)
+        lines.append(list_obj)
     # lines.append(mapping.get(all_lines(n)[0][0]))
     # print(lines)
 
@@ -84,8 +85,9 @@ def make_deck(n, pics):
 
     return lines
 
-random.shuffle(animals)
+# random.shuffle(animals)
 deck = make_deck(7, animals)
+print(deck)
 # print(len(deck))
 # for card in deck:
 #     card1 = deck.pop()
@@ -123,7 +125,7 @@ def play_game(deck):
 
 # play_game(deck)
 
-print('one:', one)
-print('two:', two)
-print('three:', three)
-print('six:', six)
+# print('one:', one)
+# print('two:', two)
+# print('three:', three)
+# print('six:', six)

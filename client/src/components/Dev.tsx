@@ -1,12 +1,12 @@
 import * as React from 'react';
-import { ordinaryPoints, pointsAtInfinity, allPoints, allLines} from '../utils/deck'
+import { Deck } from '../utils/deck'
+import { animals } from '../utils/animals'
 
 function Dev() {
-    console.log(ordinaryPoints(7))
-    console.log(pointsAtInfinity(7))
-    console.log(allPoints(7))
-    console.log(allLines(7))
 
+    const myDeck = new Deck(7)
+    const deck = myDeck.makeDeck(7, animals)
+    // console.log(deck)
     return (
         <h1>Test</h1>
     )
