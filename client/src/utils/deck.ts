@@ -67,38 +67,27 @@ class Deck {
     makeDeck(n: number = this.nValue, imgs: string[]) {
         const points = this.allPoints(n)
 
-        const mapping = new Map()
+        const mapping: any = {}
 
         // iterate through points[] and imgs[]
         points.forEach((point, index) => {
             const img = imgs[index]
-            mapping.set(point, img)
+            mapping[point] = img
         })
 
         // loops through lines which contain points. 
         // loops those points onto the map's identical points
         // appends value of the point key (the picture) onto card array
-        const mappingKeys = Array.from(mapping.keys())
-        // console.log(mappingKeys[0])
-        const firstAnimal = mapping.get(mappingKeys[0])
-        // console.log(firstAnimal)
         const lines: any[] = []
         const allLines = this.allLines(n)
-        const firstLine = allLines[0]
-        // console.log(mapping.get(firstLine[0]))
-        // console.log(mapping.get([ 0, 0 ]))
-        // console.log(allLines)
         for (const line of allLines) {
             const card: any[] = []
-            // console.log(line)
             line.map(point => {
-                // console.log(point)
-                // console.log(mapping.get(point))
-                card.push(mapping.get(point))
+                card.push(mapping[point.toString()])
             })
             lines.push(card)
         }
-        // console.log(lines)
+        return lines
     }
 }
 

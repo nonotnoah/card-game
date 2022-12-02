@@ -6,7 +6,7 @@ function Dev() {
 
     const myDeck = new Deck(7)
     const deck = myDeck.makeDeck(7, animals)
-    // console.log(deck)
+    console.log(deck)
     return (
         <h1>Test</h1>
     )
