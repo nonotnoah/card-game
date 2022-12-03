@@ -77,8 +77,8 @@ class Deck {
 
         // loops through lines which contain points. 
         // loops those points onto the map's identical points
-        // appends value of the point key (the picture) onto card array
-        const lines: any[] = []
+        // pushes value of point key (the picture) onto card array
+        const lines: string[][] = []
         const allLines = this.allLines(n)
         for (const line of allLines) {
             const card: any[] = []
