@@ -4,15 +4,33 @@ import { animals } from '../utils/animals'
 import '../styles/App.css'
 import Card from './Cards'
 
-function Dev() {
-    const myDeck = new Deck(7)
-    const deck = myDeck.makeDeck(7, animals)
-    console.log(deck)
+type CardType = {
+    card: (string[] | null | undefined)
+}
 
-    const firstCard = deck[0]
+function Dev() {
+    const myDeck = new Deck(8, animals)
+    const [cardOne, setCardOne] = React.useState(Array<string>)
+    const [cardTwo, setCardTwo] = React.useState(Array<string>)
+    const [match, setMatch] = React.useState('None')
+
+    const handleDraw = () => {
+        const card1 = myDeck.drawCard()
+        const card2 = myDeck.drawCard()
+        if (Array.isArray(card1) && Array.isArray(card2)) {
+            setCardOne(card1)
+            setCardTwo(card2)
+            setMatch(myDeck.compareCards(cardOne, cardTwo))
+        }
+    }
 
     return (
-        <Card card={firstCard} />
+        <>
+        <button onClick={() => handleDraw()}>Draw</button>
+        <Card card={cardOne} />
+        <Card card={cardTwo} />
+        <div className="match">{match}</div>
+        </>
     )
 }
 

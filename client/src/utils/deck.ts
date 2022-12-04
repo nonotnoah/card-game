@@ -1,13 +1,22 @@
 // why doesn't this work
 // type SpecialArray = (number | number[] | string)[]
 type SpecialArray = any[]
+interface Card {
+    card: string[]
+}
 
 class Deck {
     rangeArray: SpecialArray = []
     nValue: number
-    constructor(n: number) {
+    cards: string[][]
+    cardsCopy: string[][]
+
+    constructor(n: number, imgs: string[]) {
         this.rangeArray = this.range(n)
         this.nValue = n
+        this.cards = this.makeDeck(n, imgs) 
+        // make a deep copy of the deck
+        this.cardsCopy = [...this.cards]
     }
 
     range(n: number = this.nValue) {
@@ -89,6 +98,25 @@ class Deck {
         }
         return lines
     }
+
+    drawCard() {
+        if (this.cardsCopy.length < 2) {
+            return null
+        }
+        const card = this.cardsCopy.shift()
+        return card
+    }
+
+    compareCards(card1: Card['card'], card2: Card['card']) {
+        for (let symbol1 of card1) {
+            for (let symbol2 of card2) {
+                if (symbol1 == symbol2) {
+                    return symbol1
+                }
+            }
+        }
+        return 'No match'
+    }
 }
 
-export { Deck }
+export { Deck as Deck }

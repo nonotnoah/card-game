@@ -1,16 +1,15 @@
 import * as React from 'react';
+import '../styles/Cards.css'
 
-interface CardProps {
-    card: string[]
+interface Card {
+    card: (string[] | null | undefined)
 }
 
-function Card({card}: CardProps) {
-// const Card: React.FC<cardProp> = (card: cardProp) => {
+function Card({ card }: Card) {
+    const isArray = (Array.isArray(card))
     return (
         <div className="card">
-            {card.map((picture: string) => (
-                <button className="picture">{picture}</button>
-            ))}
+            {isArray ? card.map((picture: string) => (<button className="picture">{picture}</button>)) : <h1>No more cards!</h1> }
         </div>
     )
 }
