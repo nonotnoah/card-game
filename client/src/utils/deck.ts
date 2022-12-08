@@ -7,14 +7,14 @@ interface Card {
 
 class Deck {
     rangeArray: SpecialArray = []
-    nValue: number
+    nValue: number // number of symbols on a card is nValue+1
     cards: string[][]
     cardsCopy: string[][]
 
     constructor(n: number, imgs: string[]) {
         this.rangeArray = this.range(n)
         this.nValue = n
-        this.cards = this.makeDeck(n, imgs) 
+        this.cards = this.makeDeck(n, imgs)
         // make a deep copy of the deck
         this.cardsCopy = [...this.cards]
     }
@@ -51,6 +51,7 @@ class Deck {
     ordinaryLine(m: number, b: number, n: number = this.nValue) {
         const line: number[][] = []
         this.rangeArray.map(x => line.push([x, (m * x + b) % n]))
+        line.push([m])
         return line
     }
 
@@ -66,7 +67,7 @@ class Deck {
     }
 
     allLines(n: number = this.nValue) {
-        const lines = []
+        const lines: any[][] = []
         this.rangeArray.map(m => this.rangeArray.map(b => lines.push(this.ordinaryLine(m, b, n))))
         this.rangeArray.map(x => lines.push(this.verticalLine(x, n)))
         lines.push(this.lineAtInfinity(n))
@@ -92,7 +93,9 @@ class Deck {
         for (const line of allLines) {
             const card: any[] = []
             line.map(point => {
-                card.push(mapping[point.toString()])
+                if (typeof point != "string") {
+                    card.push(mapping[point.toString()])
+                }
             })
             lines.push(card)
         }

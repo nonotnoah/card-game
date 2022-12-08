@@ -25,6 +25,7 @@ def ordinary_line(m, b, n):
     for x in range(n):
         lines.append((x, (m * x + b) % n))
     lines.append(m)
+    print(lines)
     return lines
 
 def vertical_line(x, n):
@@ -50,8 +51,11 @@ def all_lines(n):
 
     return lines
 
-six = all_lines(N_VALUE)
+# six = all_lines(N_VALUE)
 
+# for line in six:
+#     print(line)
+# print(len(six))
 # print(all_lines(7))
 
 import random
@@ -87,22 +91,13 @@ def make_deck(n, pics):
 
 # random.shuffle(animals)
 deck = make_deck(7, animals)
-print(deck)
-# print(len(deck))
 # for card in deck:
-#     card1 = deck.pop()
-#     card2 = deck.pop()
-#     match = [pic for pic in card1 if pic in card2]
+#     print(card)
 
-#     if len(match) == 0:
-#         print(card1, card2)
-#     else:
-#         print(match)
-# print(ordinary_points(7))
 def play_game(deck):
     # make a copy so as not to much with the original deck, and then shuffle it
     deck = deck[:]
-    random.shuffle(deck)
+    # random.shuffle(deck)
 
     # keep playing until fewer than 2 cards are left    
     while len(deck) >= 2:
