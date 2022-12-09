@@ -5,6 +5,6 @@ import Dev from './components/Dev'
 import './styles/index.css'
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
-  // <App />
-  <Dev />
+  <App />
+  // <Dev />
 )

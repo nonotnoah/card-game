@@ -16,7 +16,7 @@ const io = new Server(server, {
 //     res.send('Hello from server')
 // })
 
-io.on('connection', (socket) => {
+io.on('connection', (socket: any) => {
     console.log('New Socket: ', socket.id)
     io.emit('test')
     socket.on('disconnect', () => {

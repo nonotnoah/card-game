@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react'
-import './styles/App.css'
+import '../styles/App.css'
 import { io } from 'socket.io-client'
 
 function App() {
