@@ -1,0 +1,4 @@
+server side card draw:
+- card is functional component
+- draw is automatic
+- after match, every client sends 
