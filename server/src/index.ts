@@ -1,11 +1,13 @@
 // imports
-const express = require('express')
-const http = require('http')
+import express from 'express'
+import http from 'http'
+import { Server, Socket } from 'socket.io'
+
+import { Game } from './game/game'
 
 const app = express()
 const server = http.createServer(app)
 
-const { Server } = require('socket.io')
 const io = new Server(server, {
     cors: {
         origin: '*'
@@ -16,12 +18,22 @@ const io = new Server(server, {
 //     res.send('Hello from server')
 // })
 
-io.on('connection', (socket: any) => {
+interface Players {
+    [key: string]: Socket
+}
+let players: Players = {}
+io.on('connection', (socket: Socket) => {
     console.log('New Socket: ', socket.id)
-    io.emit('test')
+    players[socket.id] = socket
+
+    if (Object.keys(players).length > 1) {
+        const newGame = new Game(io, players)
+    }
+    // io.emit('test')
     socket.on('disconnect', () => {
         console.log('Socket Closed: ', socket.id)
-        io.emit('disc')
+        delete players[socket.id]
+        // io.emit('disc')
     })
 })
 
