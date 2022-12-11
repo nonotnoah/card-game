@@ -3,18 +3,18 @@ import '../styles/App.css'
 import { io } from 'socket.io-client'
 
 function App() {
+  // connect client
   const connect = () => {
-      console.log('Client connecting...')
       const socket = io('http://localhost:5000')
   }
-  
-  // value can be accessed with playerCount.current
-  // does not trigger a re-render
-  const playerCount = useRef(0)
 
   useEffect(() => {
     connect()
   }, [])
+  
+  // value can be accessed with playerCount.current
+  // does not trigger a re-render
+  const playerCount = useRef(0)
 
   return (
     <h1>Test</h1>
