@@ -20,13 +20,18 @@ class Game {
     playGame(deck: Deck) {
         const card1 = deck.drawCard()
         const card2 = deck.drawCard()
+        let match: string
         if (Array.isArray(card1) && Array.isArray(card2)) {
-            const match = this.deck.compareCards(card1, card2)
+            match = this.deck.compareCards(card1, card2)
             this.io.emit('draw', { card1, card2, match }) // TODO don't send "match" in plaintext
         }
 
+        this.io.on('correct', (guess) => {
+            if (guess == match) {
+                console.log(guess)
+            }
+        })
     }
-
 
 }
 

@@ -8,6 +8,8 @@ import { Game } from './game/game'
 const app = express()
 const server = http.createServer(app)
 
+// do i need to spin up a new server for every room?????
+// if not, after how many players should I use a new server?
 const io = new Server(server, {
     cors: {
         origin: '*'
@@ -29,7 +31,7 @@ io.on('connection', (socket: Socket) => {
     if (Object.keys(players).length > 1) {
         const newGame = new Game(io, players)
     }
-    // io.emit('test')
+
     socket.on('disconnect', () => {
         console.log('Socket Closed: ', socket.id)
         delete players[socket.id]

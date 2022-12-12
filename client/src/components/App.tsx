@@ -9,21 +9,37 @@ interface drawPayload {
     match: string
 }
 
+const socket = io('http://localhost:5000')
+
 function App() {
     const [showCard, setShowCard] = useState<Boolean>(false)
-    // connect client
-    // const socket: MutableRefObject<Socket>['current'] = useRef(io('http://localhost:5000'))
-    const socket: MutableRefObject<Socket> = useRef(io('http://localhost:5000'))
-    // const socket: any = useRef(io('http://localhost:5000'))
+    const [cards, setCards] = useState({
+        one: [] as string[],
+        two: [] as string[],
+        match: ''
+    })
+    let guessOne = ''
+    let guessTwo = ''
+    const handleGuess = (id: number, guess: string) => {
+        if (id == 1) {
+            guessOne = guess
+        }
+        if (id == 2) {
+            guessTwo = guess
+        }
+        console.log(guessOne, guessTwo)
+        if (guessOne == guessTwo) {
+            socket.emit('correct', guess)
+        }
+    }
+    socket.emit('correct', 'teset')
 
-    let card1
-    let card2
-    let match
-
-    socket.current.on('draw', (val: drawPayload) => {
-        card1 = val.card1
-        card2 = val.card2
-        match = val.match
+    socket.on('draw', (val: drawPayload) => {
+        setCards({
+            one: val.card1,
+            two: val.card2,
+            match: val.match
+        })
         setShowCard(true)
         console.log(val)
         console.log(showCard)
@@ -33,9 +49,8 @@ function App() {
         <div className="wrapper">
             {showCard ? (
                 <>
-                    <Card card={card1} />
-                    <Card card={card2} />
-                    <div className="match">{match}</div>
+                    <Card id={1} card={cards.one} match={cards.match} onGuess={handleGuess}/>
+                    <Card id={2} card={cards.two} match={cards.match} onGuess={handleGuess}/>
                 </>
             ) : (
                 <>
