@@ -30,27 +30,29 @@ function App() {
         console.log(guessOne, guessTwo)
         if (guessOne == guessTwo) {
             socket.emit('correct', guess)
+            console.log('emitting guess')
         }
     }
-    socket.emit('correct', 'teset')
-
+    socket.onAny((event) => {
+        console.log('Heard event', event)
+    })
     socket.on('draw', (val: drawPayload) => {
+        // console.log('drawing new card', val)
         setCards({
             one: val.card1,
             two: val.card2,
             match: val.match
         })
         setShowCard(true)
-        console.log(val)
-        console.log(showCard)
+        // console.log(showCard)
     })
 
     return (
         <div className="wrapper">
             {showCard ? (
                 <>
-                    <Card id={1} card={cards.one} match={cards.match} onGuess={handleGuess}/>
-                    <Card id={2} card={cards.two} match={cards.match} onGuess={handleGuess}/>
+                    <Card id={1} card={cards.one} match={cards.match} onGuess={handleGuess} />
+                    <Card id={2} card={cards.two} match={cards.match} onGuess={handleGuess} />
                 </>
             ) : (
                 <>
