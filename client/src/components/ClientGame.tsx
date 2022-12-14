@@ -4,17 +4,17 @@ import { io, Socket } from 'socket.io-client'
 import Card from './Cards'
 import { Counter } from './Counter'
 
-interface drawPayload {
+interface DrawPayload {
     card1: string[],
     card2: string[],
     match: string
 }
-interface socketProps {
+interface SocketProps {
     socket: Socket
 }
 
-function ClientGame({ socket }: socketProps) {
-    const [clearGuess, setClearGuess] = useState(false)
+function ClientGame({ socket }: SocketProps) {
+    const [clearGuess, setClearGuess] = useState('')
     const [showCard, setShowCard] = useState(false)
     const [cards, setCards] = useState({
         one: [] as string[],
@@ -36,19 +36,20 @@ function ClientGame({ socket }: socketProps) {
             console.log('emitting guess')
         }
     }
+    // socket event listeners
     useEffect(() => {
         socket.onAny((event) => {
             console.log('Heard event', event)
         })
-        socket.on('draw', (val: drawPayload) => {
+        socket.on('draw', (val: DrawPayload) => {
             // console.log('drawing new card', val)
+            setClearGuess('')
             setCards({
                 one: val.card1,
                 two: val.card2,
                 match: val.match
             })
             setShowCard(true)
-            setClearGuess(true)
             // console.log(showCard)
         })
         return (): void => {

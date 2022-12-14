@@ -1,34 +1,40 @@
 import * as React from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import '../styles/Cards.css'
 import { Counter } from './Counter';
 
-interface Card {
+interface CardProps {
     id: number
     card: (string[] | null | undefined)
     match: (string)
     onGuess: (id: number, guess: string) => void
-    clearGuess: boolean
+    clearGuess: string
 }
 
-function Card({ id, card, match, onGuess, clearGuess }: Card) {
+function Card({ id, card, match, onGuess, clearGuess }: CardProps) {
     const isArray = (Array.isArray(card))
     const [currentGuess, setCurrentGuess] = useState<string>('')
-    // if (clearGuess) {
+    // const check = useRef(card)
+    // if (check.current != card) {
+    //     check.current == card
     //     setCurrentGuess('')
     // }
-    // useEffect(() => {
-    //     console.log(currentGuess)
-    // }, [currentGuess]) 
+    // const selection = useRef(clearGuess)
+    // if (clearGuess == '') {
+    //     console.log(id, clearGuess)
+    //     selection.current = ''
+    // }
     const handleGuess = (id: number, picture: string) => {
         // deselect logic
         if (currentGuess == picture) {
             onGuess(id, '')
             setCurrentGuess('')
+            // selection.current = ''
         // select logic
         } else {
             onGuess(id, picture)
             setCurrentGuess(picture)
+            // selection.current = picture
         }
     }
 

@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Deck } from '../utils/deck'
 import { animals } from '../utils/animals'
 import '../styles/App.css'
-import Card from './Cards'
+import CardProps from './Cards'
 import { shuffleArray } from '../utils/shuffle';
 
 type CardType = {
