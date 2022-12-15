@@ -20,6 +20,7 @@ function Table({ cards, sendGuess }: TableProps) {
     const [selectTwo, setSelectTwo] = useState('')
     // console.log('table cards', cards)
 
+    // 
     let guess = useRef({ one: 'None', two: 'None' })
     const lastCard = useRef(cards)
     // this checks if there's a new card every render
@@ -31,7 +32,7 @@ function Table({ cards, sendGuess }: TableProps) {
             // removes selection. only causes one re-render since lastCard is now up to date
             setSelectOne('')
             setSelectTwo('')
-            //
+            // resets guesses
             guess.current.one = ''
             guess.current.two = ''
         }
@@ -47,7 +48,7 @@ function Table({ cards, sendGuess }: TableProps) {
             setSelectTwo(guessed)
         }
         console.log('Card 1:', guess.current.one, '\nCard 2:', guess.current.two)
-        if (guess.current.one == guess.current.two) {
+        if (guessed != '' && guess.current.one == guess.current.two) {
             sendGuess(guessed)
         }
     }
