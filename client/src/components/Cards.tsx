@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, memo } from 'react';
 import '../styles/Cards.css'
 import { Counter } from './Counter';
 
@@ -8,33 +8,20 @@ interface CardProps {
     card: (string[] | null | undefined)
     match: (string)
     onGuess: (id: number, guess: string) => void
-    clearGuess: string
+    selection: string // only update Card if this updates
 }
 
-function Card({ id, card, match, onGuess, clearGuess }: CardProps) {
+function Card({ id, card, match, selection, onGuess }: CardProps) {
     const isArray = (Array.isArray(card))
-    const [currentGuess, setCurrentGuess] = useState<string>('')
-    // const check = useRef(card)
-    // if (check.current != card) {
-    //     check.current == card
-    //     setCurrentGuess('')
-    // }
-    // const selection = useRef(clearGuess)
-    // if (clearGuess == '') {
-    //     console.log(id, clearGuess)
-    //     selection.current = ''
-    // }
+    // const [currentGuess, setCurrentGuess] = useState('')
+
     const handleGuess = (id: number, picture: string) => {
         // deselect logic
-        if (currentGuess == picture) {
+        if (selection == picture) {
             onGuess(id, '')
-            setCurrentGuess('')
-            // selection.current = ''
         // select logic
         } else {
             onGuess(id, picture)
-            setCurrentGuess(picture)
-            // selection.current = picture
         }
     }
 
@@ -47,7 +34,7 @@ function Card({ id, card, match, onGuess, clearGuess }: CardProps) {
                     className={`
                     picture 
                     ${picture == match ? 'match' : ''} 
-                    ${currentGuess == picture ? 'selected' : ''}
+                    ${selection == picture ? 'selected' : ''}
                     `}
                     onClick={() => { handleGuess(id, picture) }}
                 >
@@ -60,4 +47,4 @@ function Card({ id, card, match, onGuess, clearGuess }: CardProps) {
     )
 }
 
-export default Card
+export default memo(Card)
