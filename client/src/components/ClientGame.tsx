@@ -29,7 +29,7 @@ function ClientGame({ socket }: SocketProps) {
         // })
         socket.on('draw', (val: DrawPayload) => {
             setCards(val)
-            console.log('drawing new card', cards)
+            console.log('drawing new card', val)
         })
         return (): void => {
             socket.removeAllListeners()

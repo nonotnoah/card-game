@@ -13,7 +13,6 @@ interface CardProps {
 
 function Card({ id, card, match, selection, onGuess }: CardProps) {
     const isArray = (Array.isArray(card))
-    // const [currentGuess, setCurrentGuess] = useState('')
 
     const handleGuess = (id: number, picture: string) => {
         // deselect logic
