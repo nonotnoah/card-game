@@ -19,19 +19,20 @@ class Game {
         this.id = uuidv4()
         this.joinRoom(this.players, this.id)
 
-        this.deck = new Deck(3, animals)
+        // dobble numbers: 3, 7, 13, 21
+        this.deck = new Deck(6, animals)
         this.playGame()
     }
 
     // join all players to game unique room
-    joinRoom(players: Players, id: string) {
+    joinRoom(players: Players, roomId: string) {
         Object.values(players).map(socket => {
-            socket.join(id)
-            console.log(socket.id, 'joined', id)
+            socket.join(roomId)
+            // console.log(socket.id, 'joined', roomId)
         })
     }
     emit(event: string, ...args: any[]) {
-        this.io.in(this.id).emit(event, args)
+        this.io.in(this.id).emit(event, ...args)
     }
 
     // add event listener to all sockets in room
@@ -58,7 +59,7 @@ class Game {
         if (Array.isArray(card1) && Array.isArray(card2)) {
             match = this.deck.compareCards(card1, card2)
             this.emit('draw', { card1, card2, match })
-            console.log('sending cards...')
+            // console.log('sending cards...')
         } else {
             match = ''
         }

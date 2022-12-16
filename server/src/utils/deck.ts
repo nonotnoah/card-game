@@ -17,8 +17,7 @@ class Deck {
         this.cards = this.makeDeck(n, imgs)
         // make a deep copy of the deck
         this.cardsCopy = [...this.cards]
-        console.log(this.cardsCopy)
-        this.test()
+        // this.test()
     }
 
     range(n: number = this.nValue) {
@@ -30,6 +29,7 @@ class Deck {
     }
 
     test(n: number = this.nValue) {
+        console.log(this.cardsCopy)
         console.log('ordinarypoints:', this.ordinaryPoints(n))
         console.log('pointsatinfinity:', this.pointsAtInfinity(n))
         console.log('allpoints:', this.allPoints(n))

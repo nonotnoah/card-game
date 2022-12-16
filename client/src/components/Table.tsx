@@ -26,7 +26,7 @@ function Table({ cards, sendGuess }: TableProps) {
     // this checks if there's a new card every render
     useEffect(() => {
         if (lastCard.current !== cards) {
-            console.log('new card detected')
+            console.log('new card detected', cards)
             // sets lastCard to current
             lastCard.current = cards
             // removes selection. only causes one re-render since lastCard is now up to date

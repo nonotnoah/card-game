@@ -4,14 +4,18 @@ import { io, Socket } from 'socket.io-client'
 import Card from './Cards'
 import { Counter } from './Counter'
 import Table from './Table'
+import { string } from 'prop-types'
 
 interface DrawPayload {
     card1: string[],
     card2: string[],
     match: string
 }
+interface MySocket extends Socket {
+    [key: string]: any
+}
 interface SocketProps {
-    socket: Socket
+    socket: MySocket
 }
 
 function ClientGame({ socket }: SocketProps) {
@@ -20,17 +24,32 @@ function ClientGame({ socket }: SocketProps) {
         card2: [],
         match: ''
     })
-    
+
     // socket event listeners
     useEffect(() => {
-        // debug
+        // // debug
         // socket.onAny((event) => {
         //     console.log('Heard event', event)
         // })
+
+        // save session
+        socket.on('session', ({ sessionID, userID }) => {
+            // attach the session ID to tab storage
+            socket.auth = { sessionID }
+            // save the userID
+            socket.userID = userID
+            // store in sessionStorage. this should implement localStorage in live build
+            sessionStorage.setItem('sessionID', sessionID)
+            console.log('set sessionID:', sessionID)
+        })
+
+        // draw card
         socket.on('draw', (val: DrawPayload) => {
             setCards(val)
             console.log('drawing new card', val)
         })
+
+        // cb
         return (): void => {
             socket.removeAllListeners()
         }
