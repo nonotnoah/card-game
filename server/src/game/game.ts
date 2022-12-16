@@ -19,7 +19,7 @@ class Game {
         this.id = uuidv4()
         this.joinRoom(this.players, this.id)
 
-        this.deck = new Deck(7, animals)
+        this.deck = new Deck(3, animals)
         this.playGame()
     }
 
@@ -29,6 +29,9 @@ class Game {
             socket.join(id)
             console.log(socket.id, 'joined', id)
         })
+    }
+    emit(event: string, ...args: any[]) {
+        this.io.in(this.id).emit(event, args)
     }
 
     // add event listener to all sockets in room
@@ -48,13 +51,13 @@ class Game {
         })
     }
 
-    drawCards() {
+    nextTurn() {
         const card1 = this.deck.drawCard()
         const card2 = this.deck.drawCard()
         let match: string
         if (Array.isArray(card1) && Array.isArray(card2)) {
             match = this.deck.compareCards(card1, card2)
-            this.io.in(this.id).emit('draw', { card1, card2, match }) // TODO don't send "match" in plaintext
+            this.emit('draw', { card1, card2, match })
             console.log('sending cards...')
         } else {
             match = ''
@@ -63,16 +66,19 @@ class Game {
     }
 
     playGame() {
-        let match = this.drawCards().match
+        let match = this.nextTurn().match
 
         this.addListener('correct', (guess: string, socket: Socket) => {
             if (guess === match) {
                 console.log(socket.id, 'Correct guess!', guess)
-                match = this.drawCards().match
+                // draw next card and determine match
+                match = this.nextTurn().match
+                if (match === '') {
+                    this.emit('game over')
+                }
             }
         })
     }
-
 }
 
 export { Game }

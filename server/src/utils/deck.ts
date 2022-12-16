@@ -17,6 +17,8 @@ class Deck {
         this.cards = this.makeDeck(n, imgs)
         // make a deep copy of the deck
         this.cardsCopy = [...this.cards]
+        console.log(this.cardsCopy)
+        this.test()
     }
 
     range(n: number = this.nValue) {
@@ -25,6 +27,13 @@ class Deck {
             arr.push(i)
         }
         return arr
+    }
+
+    test(n: number = this.nValue) {
+        console.log('ordinarypoints:', this.ordinaryPoints(n))
+        console.log('pointsatinfinity:', this.pointsAtInfinity(n))
+        console.log('allpoints:', this.allPoints(n))
+        console.log('alllines:', this.allLines(n))
     }
 
     ordinaryPoints(n: number = this.nValue) {
@@ -93,8 +102,10 @@ class Deck {
         for (const line of allLines) {
             const card: any[] = []
             line.map(point => {
-                if (typeof point != "string") {
+                if (typeof point != "string") { // [0, 0] -> to string
                     card.push(mapping[point.toString()])
+                } else {
+                    card.push(mapping[point]) // 'inf' is already string
                 }
             })
             lines.push(card)
