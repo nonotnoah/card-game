@@ -11,8 +11,9 @@ function App() {
 
     const sessionID = sessionStorage.getItem('sessionID')
     if (sessionID) {
+        const room = sessionStorage.getItem('room')
         console.log('reconnecting')
-        socket.current.auth = { sessionID }
+        socket.current.auth = { sessionID, room }
         socket.current.connect()
         if (!loggedIn) {
             setLoggedIn(true)

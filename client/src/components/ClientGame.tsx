@@ -36,7 +36,6 @@ function ClientGame({ socket }: SocketProps) {
             console.log(`connect_error due to ${err.message}`)
         })
 
-
         // save session
         socket.on('session', ({ sessionID, userID }) => {
             // attach the session ID to tab storage
@@ -46,6 +45,11 @@ function ClientGame({ socket }: SocketProps) {
             // store in sessionStorage. this should implement localStorage in live build
             sessionStorage.setItem('sessionID', sessionID)
             console.log('set sessionID:', sessionID)
+        })
+
+        // save room
+        socket.on('room', (roomID) => {
+            sessionStorage.setItem('room', roomID)
         })
 
         // draw card

@@ -29,6 +29,10 @@ class ServerSessionStore extends SessionStore {
     findAllSessions() {
         return [...this.sessions.values()];
     }
+
+    closeAllSessions() {
+        this.sessions = new Map<string, Session>()
+    }
 }
 
 const SESSION_TTL = 24 * 60 * 60;

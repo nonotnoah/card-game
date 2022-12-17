@@ -15,14 +15,14 @@ class Game {
     io
     players
     deck
-    id
+    roomID
     serverStorage
     constructor(io: Server, players: Players, serverStorage: ServerSessionStore) {
         this.io = io
 
         this.players = players
-        this.id = uuidv4()
-        this.joinRoom(this.players, this.id)
+        this.roomID = uuidv4()
+        this.joinRoom(this.players, this.roomID)
 
         this.serverStorage = serverStorage
 
@@ -35,19 +35,19 @@ class Game {
     joinRoom(players: Players, roomID: string) {
         Object.values(players).map(socket => {
             socket.join(roomID)
-            this.serverStorage.saveSession(socket.sessionID, {
-                roomID: socket.roomID,
-                // these don't need to be here but I'm too tired to 
-                // fight with types right now
-                userID: socket.userID,
-                username: socket.username,
-                connected: true
-            })
+            // this.serverStorage.saveSession(socket.sessionID, {
+            //     roomID: socket.roomID,
+            //     // these don't need to be here but I'm too tired to 
+            //     // fight with types right now
+            //     userID: socket.userID,
+            //     username: socket.username,
+            //     connected: true
+            // })
             // console.log(socket.id, 'joined', roomId)
         })
     }
     emit(event: string, ...args: any[]) {
-        this.io.in(this.id).emit(event, ...args)
+        this.io.in(this.roomID).emit(event, ...args)
     }
 
     // add event listener for all sockets in room
@@ -57,7 +57,7 @@ class Game {
                 func(res, socket)
             })
         })
-        console.log('Added listener', listener, 'to', this.id)
+        console.log('Added listener', listener, 'to', this.roomID)
     }
     _addOnAnyListener(func: Function) {
         Object.values(this.players).map(socket => {
@@ -82,6 +82,7 @@ class Game {
     }
 
     playGame() {
+        this.emit('room', this.roomID)
         let match = this.nextTurn().match
 
         this.addListener('correct', (guess: string, socket: Socket) => {

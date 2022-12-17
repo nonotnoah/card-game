@@ -37,13 +37,13 @@ io.use((socket: MySocket, next) => {
     console.log('session ID:', sessionID)
     if (sessionID) {
         // find existing session
-        const session = serverStorage.findSession(sessionID)
+        const serverSession = serverStorage.findSession(sessionID)
         console.log('found existing sesison:', sessionID)
-        if (session) {
+        if (serverSession) {
             socket.sessionID = sessionID
-            socket.userID = session.userID
-            socket.username = session.username
-            // socket.room = session.room
+            socket.userID = serverSession.userID
+            socket.username = serverSession.username
+            socket.roomID = socket.handshake.auth.roomID
             return next()
         }
     }
@@ -56,8 +56,12 @@ io.use((socket: MySocket, next) => {
 })
 
 let players: Players = {}
+let gameCreated = false
 io.on('connection', (socket: MySocket) => {
     console.log('socket connected:', socket.username)
+    if (socket.roomID) {
+        socket.join(socket.roomID)
+    }
 
     // send session details to newly connected socket
     socket.emit('session', {
@@ -78,9 +82,10 @@ io.on('connection', (socket: MySocket) => {
     // let playerIDs = Object.keys(players)
     let playerIDs = serverStorage.findAllSessions()
     console.log('sessions:\n', playerIDs)
-    if (playerIDs.length == 2) {
-        // console.log('Creating new game with:', Object.keys(players))
-        // const newGame = new Game(io, players, serverStorage)
+    if (playerIDs.length == 2 && !gameCreated) {
+        console.log('Creating new game with:', Object.keys(players))
+        const newGame = new Game(io, players, serverStorage)
+        gameCreated = true
     }
 
     socket.on('disconnect', async () => {
