@@ -7,12 +7,13 @@ interface Session {
     userID: string,
     username: string,
     connected: Boolean
+    roomID?: string
 }
 class ServerSessionStore extends SessionStore {
     sessions
     constructor() {
         super();
-        this.sessions = new Map();
+        this.sessions = new Map<string, Session>(); // this will need to be cleared at some time
     }
 
     // not implemented

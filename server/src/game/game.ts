@@ -2,9 +2,13 @@ import { Server, Socket } from 'socket.io'
 import { Deck } from '../utils/deck'
 import { animals } from '../utils/animals'
 import { v4 as uuidv4 } from 'uuid'
+import ServerSessionStore from '../sessionStore'
 
+interface MySocket extends Socket {
+    [key: string]: any
+}
 interface Players {
-    [key: string]: Socket
+    [key: string]: MySocket
 }
 
 class Game {
@@ -12,12 +16,15 @@ class Game {
     players
     deck
     id
-    constructor(io: Server, players: Players) {
+    serverStorage
+    constructor(io: Server, players: Players, serverStorage: ServerSessionStore) {
         this.io = io
 
         this.players = players
         this.id = uuidv4()
         this.joinRoom(this.players, this.id)
+
+        this.serverStorage = serverStorage
 
         // dobble numbers: 3, 7, 13, 21
         this.deck = new Deck(6, animals)
@@ -25,9 +32,17 @@ class Game {
     }
 
     // join all players to game unique room
-    joinRoom(players: Players, roomId: string) {
+    joinRoom(players: Players, roomID: string) {
         Object.values(players).map(socket => {
-            socket.join(roomId)
+            socket.join(roomID)
+            this.serverStorage.saveSession(socket.sessionID, {
+                roomID: socket.roomID,
+                // these don't need to be here but I'm too tired to 
+                // fight with types right now
+                userID: socket.userID,
+                username: socket.username,
+                connected: true
+            })
             // console.log(socket.id, 'joined', roomId)
         })
     }
@@ -35,7 +50,7 @@ class Game {
         this.io.in(this.id).emit(event, ...args)
     }
 
-    // add event listener to all sockets in room
+    // add event listener for all sockets in room
     addListener(listener: string, func: Function) {
         Object.values(this.players).map(socket => {
             socket.on(listener, (res: any) => {

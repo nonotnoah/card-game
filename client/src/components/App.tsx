@@ -7,21 +7,16 @@ const URL: string = 'http://localhost:5000'
 
 function App() {
     const [loggedIn, setLoggedIn] = useState(false)
+    const socket = useRef(io(URL, { autoConnect: false }))
 
-    let socket = io(URL, { autoConnect: false })
     const sessionID = sessionStorage.getItem('sessionID')
-    // console.log(sessionID)
-    console.log(sessionStorage)
     if (sessionID) {
-        // this.usernameAlreadySelected = true
         console.log('reconnecting')
-        socket.auth = { sessionID }
-        socket.connect()
-    }
-
-    const connect = (username: string) => {
-        socket.auth = { username }
-        socket.connect()
+        socket.current.auth = { sessionID }
+        socket.current.connect()
+        if (!loggedIn) {
+            setLoggedIn(true)
+        }
     }
 
     const handleClick = (player: number = (1 | 2)) => {
@@ -33,26 +28,27 @@ function App() {
         if (player == 2) {
             username = 'two'
         }
-        connect(username)
+        socket.current.auth = { username }
+        socket.current.connect()
         setLoggedIn(true)
+        console.log('logging in first time')
     }
-
 
     return (
         <div className="wrapper">
             {loggedIn ? (
-                <ClientGame socket={socket} />
+                <ClientGame socket={socket.current} />
             ) : (
-                <>
-                    <button
-                        onClick={() => handleClick(1)}
-                        className="player1">Player 1
-                    </button>
-                    <button
-                        onClick={() => handleClick(2)}
-                        className="player2">Player 2
-                    </button>
-                </>
+            <>
+                <button
+                    onClick={() => handleClick(1)}
+                    className="player1">Player 1
+                </button>
+                <button
+                    onClick={() => handleClick(2)}
+                    className="player2">Player 2
+                </button>
+            </>
             )}
         </div>
     )

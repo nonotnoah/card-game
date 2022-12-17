@@ -25,65 +25,62 @@ interface MySocket extends Socket {
 }
 
 interface Players {
-    [key: string]: Socket
+    [key: string]: MySocket
 }
 
 const serverStorage = new ServerSessionStore()
 
 io.use((socket: MySocket, next) => {
+    // on reconnect this will be the 'sessionID' value in sessionStorage
+    // on first connect this will be undefined
     const sessionID: string = socket.handshake.auth.sessionID
     console.log('session ID:', sessionID)
     if (sessionID) {
         // find existing session
         const session = serverStorage.findSession(sessionID)
-        console.log('sessions:', serverStorage.findAllSessions())
+        console.log('found existing sesison:', sessionID)
         if (session) {
             socket.sessionID = sessionID
             socket.userID = session.userID
             socket.username = session.username
+            // socket.room = session.room
             return next()
         }
     }
+    console.log('creating new session with auth:', socket.handshake.auth)
     const username = socket.handshake.auth.username
-    if (!username) {
-        return next(new Error('invalid username'))
-    }
     socket.sessionID = randomID()
     socket.userID = randomID()
     socket.username = username
-    console.log('auth:', socket.handshake.auth)
     next()
 })
 
 let players: Players = {}
 io.on('connection', (socket: MySocket) => {
-    // connect error
-    socket.on('connect_error', err => {
-        console.log(`connect_error due to ${err.message}`)
-    })
+    console.log('socket connected:', socket.username)
 
-    console.log('New Socket: ', socket.userID)
-
-    let response = false
     // send session details to newly connected socket
     socket.emit('session', {
         sessionID: socket.sessionID,
         userID: socket.userID,
     })
-    console.log('saving session', socket.userID)
+    console.log('emitting session to:', socket.username )
 
-    // persist session
+    // persist session as key, value
     serverStorage.saveSession(socket.sessionID, {
         userID: socket.userID,
         username: socket.username,
         connected: true
     })
+    console.log('server saving', socket.username + "'s session as:", socket.userID)
 
     players[socket.userID] = socket
-    let playerIDs = Object.keys(players)
+    // let playerIDs = Object.keys(players)
+    let playerIDs = serverStorage.findAllSessions()
+    console.log('sessions:\n', playerIDs)
     if (playerIDs.length == 2) {
         // console.log('Creating new game with:', Object.keys(players))
-        // const newGame = new Game(io, players)
+        // const newGame = new Game(io, players, serverStorage)
     }
 
     socket.on('disconnect', async () => {
@@ -99,11 +96,11 @@ io.on('connection', (socket: MySocket) => {
                 connected: false,
             });
             console.log('Socket Closed: ', socket.userID)
+            console.log(playerIDs)
             delete players[socket.userID] // wait a timeout
             // io.emit('disc')
         }
     })
-    console.log(playerIDs)
 })
 
 server.listen(5000, () => {

@@ -25,12 +25,17 @@ function ClientGame({ socket }: SocketProps) {
         match: ''
     })
 
+    // debug
+    socket.onAny((event) => {
+        console.log('Heard event', event)
+    })
     // socket event listeners
     useEffect(() => {
-        // // debug
-        // socket.onAny((event) => {
-        //     console.log('Heard event', event)
-        // })
+        // connect error
+        socket.on('connect_error', err => {
+            console.log(`connect_error due to ${err.message}`)
+        })
+
 
         // save session
         socket.on('session', ({ sessionID, userID }) => {
@@ -53,7 +58,8 @@ function ClientGame({ socket }: SocketProps) {
         return (): void => {
             socket.removeAllListeners()
         }
-    }, [socket])
+    // }, [socket])
+    }, [])
 
     // socket emitters
     const sendGuess = (guess: string) => {
@@ -63,6 +69,7 @@ function ClientGame({ socket }: SocketProps) {
 
     return (
         <div className="wrapper">
+            <h3>ClientGame.tsx</h3>
             <Table cards={cards} sendGuess={sendGuess}></Table>
         </div>
     );
