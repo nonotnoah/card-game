@@ -96,6 +96,10 @@ class Game {
             }
         })
     }
+
+    endGame() {
+        // TODO: delete serverStorage sessions that were in game
+    }
 }
 
 export { Game }

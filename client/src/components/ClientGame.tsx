@@ -4,7 +4,6 @@ import { io, Socket } from 'socket.io-client'
 import Card from './Cards'
 import { Counter } from './Counter'
 import Table from './Table'
-import { string } from 'prop-types'
 
 interface DrawPayload {
     card1: string[],
@@ -41,7 +40,7 @@ function ClientGame({ socket }: SocketProps) {
             // attach the session ID to tab storage
             socket.auth = { sessionID }
             // save the userID
-            socket.userID = userID
+            // socket.userID = userID
             // store in sessionStorage. this should implement localStorage in live build
             sessionStorage.setItem('sessionID', sessionID)
             console.log('set sessionID:', sessionID)
@@ -76,6 +75,6 @@ function ClientGame({ socket }: SocketProps) {
             <h3>ClientGame.tsx</h3>
             <Table cards={cards} sendGuess={sendGuess}></Table>
         </div>
-    );
+    )
 }
 export default ClientGame

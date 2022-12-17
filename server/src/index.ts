@@ -66,7 +66,7 @@ io.on('connection', (socket: MySocket) => {
     // send session details to newly connected socket
     socket.emit('session', {
         sessionID: socket.sessionID,
-        userID: socket.userID,
+        // userID: socket.userID,
     })
     console.log('emitting session to:', socket.username )
 
@@ -74,6 +74,7 @@ io.on('connection', (socket: MySocket) => {
     serverStorage.saveSession(socket.sessionID, {
         userID: socket.userID,
         username: socket.username,
+        roomID: socket.roomID,
         connected: true
     })
     console.log('server saving', socket.username + "'s session as:", socket.userID)
@@ -89,7 +90,7 @@ io.on('connection', (socket: MySocket) => {
     }
 
     socket.on('disconnect', async () => {
-        const matchingSockets = await io.in(socket.userID).fetchSockets();
+        const matchingSockets = await io.in(socket.roomID).fetchSockets();
         const isDisconnected = matchingSockets.length === 0;
         if (isDisconnected) {
             // notify other users
@@ -98,11 +99,12 @@ io.on('connection', (socket: MySocket) => {
             serverStorage.saveSession(socket.sessionID, {
                 userID: socket.userID,
                 username: socket.username,
+                roomID: socket.roomID,
                 connected: false,
             });
             console.log('Socket Closed: ', socket.userID)
             console.log(playerIDs)
-            delete players[socket.userID] // wait a timeout
+            delete players[socket.userID] // FIXME: wait a timeout
             // io.emit('disc')
         }
     })

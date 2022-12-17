@@ -11,13 +11,18 @@ function App() {
 
     const sessionID = sessionStorage.getItem('sessionID')
     if (sessionID) {
-        const room = sessionStorage.getItem('room')
-        console.log('reconnecting')
-        socket.current.auth = { sessionID, room }
-        socket.current.connect()
         if (!loggedIn) {
+            const room = sessionStorage.getItem('room')
+            console.log('reconnecting')
+            socket.current.auth = { sessionID, room }
+            socket.current.connect()
             setLoggedIn(true)
         }
+    }
+
+    if (!sessionID && loggedIn) {
+        // if game ended and client refreshes
+        setLoggedIn(false)
     }
 
     const handleClick = (player: number = (1 | 2)) => {
@@ -31,7 +36,9 @@ function App() {
         }
         socket.current.auth = { username }
         socket.current.connect()
-        setLoggedIn(true)
+        if (!loggedIn) {
+            setLoggedIn(true)
+        }
         console.log('logging in first time')
     }
 
@@ -40,16 +47,16 @@ function App() {
             {loggedIn ? (
                 <ClientGame socket={socket.current} />
             ) : (
-            <>
-                <button
-                    onClick={() => handleClick(1)}
-                    className="player1">Player 1
-                </button>
-                <button
-                    onClick={() => handleClick(2)}
-                    className="player2">Player 2
-                </button>
-            </>
+                <>
+                    <button
+                        onClick={() => handleClick(1)}
+                        className="player1">Player 1
+                    </button>
+                    <button
+                        onClick={() => handleClick(2)}
+                        className="player2">Player 2
+                    </button>
+                </>
             )}
         </div>
     )
