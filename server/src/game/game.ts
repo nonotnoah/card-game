@@ -11,6 +11,11 @@ interface MySocket extends Socket {
 interface Players {
     [key: string]: MySocket
 }
+interface DrawPayload {
+    card1: (string[] | null | undefined),
+    card2: (string[] | null | undefined),
+    match: string
+}
 
 class Game {
     io
@@ -18,7 +23,7 @@ class Game {
     deck
     gameID
     serverStorage
-    match
+    cards
     constructor(io: Server, gameID: string, players: Players, serverStorage?: ServerSessionStore) {
         this.io = io
 
@@ -30,26 +35,27 @@ class Game {
 
         // dobble numbers: 3, 7, 13, 21
         this.deck = new Deck(6, animals)
-        this.match = 'init'
+        this.cards = {} as DrawPayload
         this.playGame()
     }
 
     // rules
     correct(guess: string, socket: MySocket) {
-        if (guess === this.match) {
+        if (guess === this.cards.match) {
             console.log(socket.id, 'Correct guess!', guess)
             // draw next card and determine match
-            this.match = this.nextTurn().match
-            if (this.match === '') {
+            this.nextTurn()
+            if (this.cards.match === '') {
                 this.emitToRoom('game over')
             }
         }
     }
 
-    reconnect(socket?: MySocket) {
+    reconnect(socket: MySocket) {
+        socket.emit('reconnect', this.cards)
+        this.players[socket.userID] = socket // update with fresh socket
         this.removeAllListeners()
         this.resumeGame()
-        // this.io.of(this.gameID).adapter.on('join-room', )
     }
 
     // join all players to game unique room
@@ -80,39 +86,39 @@ class Game {
     }
     // add event listener for all sockets in room
     addListenerToAll(listener: string, func: Function) {
+        let names: string[] = []
         Object.values(this.players).map(socket => {
             socket.on(listener, (res: any) => {
                 func(res, socket)
             })
+            names.push(socket.username)
         })
-        console.log('Added listeners:', listener, 'to', this.gameID)
+        console.log('Added listeners:', listener, 'to', this.gameID+':\n', names)
     }
     // clear all listeners to prevent duplication on reconnection
     // there's probably a better way to do this
     removeAllListeners() {
         Object.values(this.players).map(socket => {
-            socket.removeAllListeners()
+            socket.removeListener('correct', this.correct)
         })
         console.log('Removed all listeners from room:', this.gameID)
     }
 
     nextTurn() {
-        const card1 = this.deck.drawCard()
-        const card2 = this.deck.drawCard()
-        let match: string
-        if (Array.isArray(card1) && Array.isArray(card2)) {
-            match = this.deck.compareCards(card1, card2)
-            this.emitToRoom('draw', { card1, card2, match })
+        this.cards.card1 = this.deck.drawCard()
+        this.cards.card2 = this.deck.drawCard()
+        if (Array.isArray(this.cards.card1) && Array.isArray(this.cards.card2)) {
+            this.cards.match = this.deck.compareCards(this.cards.card1, this.cards.card2)
+            this.emitToRoom('draw', { ...this.cards })
             // console.log('sending cards...')
         } else {
-            match = ''
+            this.cards.match = ''
         }
-        return { card1, card2, match }
     }
 
     playGame() {
         this.emitToRoom('gameID', this.gameID)
-        this.match = this.nextTurn().match
+        this.nextTurn()
 
         this.addListenerToAll('correct', (guess: string, socket: MySocket) => {
             this.correct(guess, socket)
@@ -131,6 +137,7 @@ class Game {
     }
 
     resumeGame() {
+        this.emitToRoom('gameID', this.gameID)
         this.addListenerToAll('correct', (guess: string, socket: MySocket) =>
             this.correct(guess, socket)
         )
