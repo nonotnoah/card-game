@@ -30,7 +30,7 @@
 
 - check if socket has left `socket.roomID`
 
-- save `sessionID: { userID, username, roomID, connection: false}` in server storage
+- save `sessionID: { userID, username, roomID, connection: false }` in server storage
 
 ## on reconnect:
 

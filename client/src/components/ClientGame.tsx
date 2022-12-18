@@ -47,8 +47,8 @@ function ClientGame({ socket }: SocketProps) {
         })
 
         // save room
-        socket.on('room', (roomID) => {
-            sessionStorage.setItem('room', roomID)
+        socket.on('gameID', (gameID) => {
+            sessionStorage.setItem('gameID', gameID)
         })
 
         // draw card
