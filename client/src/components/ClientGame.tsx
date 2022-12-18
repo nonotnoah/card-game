@@ -57,6 +57,11 @@ function ClientGame({ socket }: SocketProps) {
             console.log('drawing new card', val)
         })
 
+        socket.on('reconnect', (val: DrawPayload) => {
+            setCards(val)
+            console.log('sending current card', val)
+        })
+
         // cb
         return (): void => {
             socket.removeAllListeners()
