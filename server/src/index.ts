@@ -91,7 +91,7 @@ io.on('connection', (socket: MySocket) => {
     // reconnect if applicable
     if (currentGames[socket.gameID]) {
         socket.join(socket.gameID)
-        currentGames[socket.gameID].reconnect()
+        currentGames[socket.gameID].reconnect(socket)
     } else if (keys.length == 2) {
         currentGames[socket.gameID] = new Game(io, socket.gameID, players, serverStorage)
         console.log('creating new game')
