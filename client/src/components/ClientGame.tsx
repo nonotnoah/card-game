@@ -61,8 +61,7 @@ function ClientGame({ socket }: SocketProps) {
         return (): void => {
             socket.removeAllListeners()
         }
-    // }, [socket])
-    }, [])
+    }, [socket])
 
     // socket emitters
     const sendGuess = (guess: string) => {

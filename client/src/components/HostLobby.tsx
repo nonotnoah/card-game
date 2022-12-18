@@ -7,6 +7,7 @@ import { LobbyProps } from '../interfaces/LobbyProps'
 const URL: string = 'http://localhost:5000'
 
 function HostLobby({ gameID }: LobbyProps) {
+    const [loggedIn, setLoggedIn] = useState(false)
     const socket = useRef(io(URL, { autoConnect: false }))
 
     const handleClick = (player: number = (1 | 2)) => {
@@ -19,11 +20,30 @@ function HostLobby({ gameID }: LobbyProps) {
         }
         socket.current.auth = { username, gameID }
         socket.current.connect()
+        if (!loggedIn) {
+            setLoggedIn(true)
+        }
     }
 
     return (
         <div className="wrapper">
-            <ClientGame socket={socket.current} />
+            {loggedIn ? (
+                <div className="wrapper">
+                    <h3>Game ID: {gameID}</h3>
+                    <ClientGame socket={socket.current} />
+                </div>
+            ) : (
+                <div className="wrapper">
+                    <button
+                        onClick={() => handleClick(1)}
+                        className="player1">Player 1
+                    </button>
+                    <button
+                        onClick={() => handleClick(2)}
+                        className="player2">Player 2
+                    </button>
+                </div>
+            )}
         </div>
     )
 }

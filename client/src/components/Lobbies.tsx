@@ -9,7 +9,8 @@ export default function Lobbies() {
     const gameID = useRef('')
 
     const createRoom = () => {
-        gameID.current = createRoomID()
+        // gameID.current = createRoomID()
+        gameID.current = '12345'
         setHost(true)
     }
 
