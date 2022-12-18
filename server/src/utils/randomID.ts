@@ -1,5 +1,5 @@
 import * as crypto from 'crypto'
 
 export default function randomID() {
-    return crypto.randomBytes(8).toString('hex')
+  return crypto.randomBytes(8).toString('hex')
 }

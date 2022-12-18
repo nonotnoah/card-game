@@ -1,3 +1,3 @@
 export interface LobbyProps {
-    gameID: string
+  gameID: string
 }
