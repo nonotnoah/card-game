@@ -7,7 +7,7 @@ interface Session {
     userID: string,
     username: string,
     connected: Boolean
-    roomID?: string
+    gameID: string
 }
 class ServerSessionStore extends SessionStore {
     sessions

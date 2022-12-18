@@ -24,10 +24,6 @@ interface MySocket extends Socket {
     [key: string]: any
 }
 
-interface Players {
-    [key: string]: MySocket
-}
-
 const serverStorage = new ServerSessionStore()
 
 io.use((socket: MySocket, next) => {
@@ -43,50 +39,62 @@ io.use((socket: MySocket, next) => {
             socket.sessionID = sessionID
             socket.userID = serverSession.userID
             socket.username = serverSession.username
-            socket.roomID = socket.handshake.auth.roomID
+            socket.gameID = socket.handshake.auth.gameID
             return next()
         }
     }
     console.log('creating new session with auth:', socket.handshake.auth)
     const username = socket.handshake.auth.username
+    const gameID = socket.handshake.auth.gameID
     socket.sessionID = randomID()
-    socket.userID = randomID()
+    socket.userID = randomID() // TODO: is this needed?
     socket.username = username
+    socket.gameID = gameID
     next()
 })
 
-let players: Players = {}
-let gameCreated = false
+interface waitingRoom {
+    [gameID: string]: {
+        [userID: string]: MySocket
+    }
+}
+
+let waitingRoom: waitingRoom = {}
+let currentGames: { [gameID: string]: Game } = {}
 io.on('connection', (socket: MySocket) => {
     console.log('socket connected:', socket.username)
-    if (socket.roomID) {
-        socket.join(socket.roomID)
-    }
-
     // send session details to newly connected socket
     socket.emit('session', {
         sessionID: socket.sessionID,
         // userID: socket.userID,
     })
-    console.log('emitting session to:', socket.username )
+    console.log('emitting session to:', socket.username)
 
     // persist session as key, value
     serverStorage.saveSession(socket.sessionID, {
         userID: socket.userID,
         username: socket.username,
-        roomID: socket.roomID,
+        gameID: socket.gameID,
         connected: true
     })
     console.log('server saving', socket.username + "'s session as:", socket.userID)
 
-    players[socket.userID] = socket
-    // let playerIDs = Object.keys(players)
     let playerIDs = serverStorage.findAllSessions()
-    console.log('sessions:\n', playerIDs)
-    if (playerIDs.length == 2 && !gameCreated) {
-        console.log('Creating new game with:', Object.keys(players))
-        const newGame = new Game(io, players, serverStorage)
-        gameCreated = true
+    console.log('sessions:\n', ...playerIDs)
+
+    // players[socket.userID] = socket
+    waitingRoom[socket.gameID] = { ...waitingRoom[socket.gameID], [socket.userID]: socket }
+    let players = waitingRoom[socket.gameID]
+    let keys = Object.keys(players)
+    console.log('room players', keys)
+
+    // reconnect if applicable
+    if (currentGames[socket.gameID]) {
+        socket.join(socket.gameID)
+        currentGames[socket.gameID].reconnect()
+    } else if (keys.length == 2) {
+        currentGames[socket.gameID] = new Game(io, socket.gameID, players, serverStorage)
+        console.log('creating new game')
     }
 
     socket.on('disconnect', async () => {
@@ -99,12 +107,13 @@ io.on('connection', (socket: MySocket) => {
             serverStorage.saveSession(socket.sessionID, {
                 userID: socket.userID,
                 username: socket.username,
-                roomID: socket.roomID,
+                gameID: socket.gameID,
                 connected: false,
             });
             console.log('Socket Closed: ', socket.userID)
-            console.log(playerIDs)
-            delete players[socket.userID] // FIXME: wait a timeout
+            console.log(serverStorage.findAllSessions())
+            // console.log(playerIDs)
+            // delete currentGames[socket.gameID].players[socket.userID] // FIXME: wait a timeout
             // io.emit('disc')
         }
     })
