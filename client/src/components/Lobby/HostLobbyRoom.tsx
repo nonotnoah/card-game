@@ -5,8 +5,8 @@ import { useState, useRef } from "react";
 import ClientGame from "../ClientGame";
 import { Socket } from "socket.io-client";
 import "../../styles/LobbyRoom.scss";
-import Players from "./Players";
 import Settings from "./Settings";
+import Players from "./Players";
 
 interface MySocket extends Socket {
   [key: string]: any
@@ -15,7 +15,7 @@ interface LobbyProps {
   socket: MySocket
   gameID: string
 }
-interface sizeProps {
+interface SizeProps {
   numberOfSymbols: number
   sizeName: string
   sizeDescription: string
@@ -32,9 +32,10 @@ export default function HostLobbyRoom({ socket, gameID }: LobbyProps) {
   }
   const handleStart = () => {
     socket.emit('start')
+    setWaitingForPlayers(false)
   }
 
-  const handleSizeChange = (val: sizeProps) => {
+  const handleSizeChange = (val: SizeProps) => {
     socket.emit('sizeChange', val)
   }
 
@@ -42,33 +43,18 @@ export default function HostLobbyRoom({ socket, gameID }: LobbyProps) {
     <div className="wrapper">
       {waitingForPlayers ? (
         <div className="box">
-          <div className="profile-wrapper">
-            <div className="title">Players</div>
-            <div className="guy-wrapper">
-              <Players socket={socket}/>
-              <img src="" alt="" />
-            </div>
-            <div className="username-wrapper">
-              <input
-                onSubmit={() => handleUsernameSubmit('')}
-                className="username"
-                type="text"
-                placeholder="Enter your name" id="name"
-              />
-              <button className="submit-button">{'>'}</button>
-            </div>
-            <div className="menu-button">
-              <button onClick={() => handleCancel()} className="cancel">Home</button>
-            </div>
-          </div>
+          <Players 
+            socket={socket}
+            onUsernameSubmit={(username) => handleUsernameSubmit(username)}
+            onCancel={() => handleCancel()}
+          />
           <Settings
-            onSizeChange={(val: sizeProps) => handleSizeChange(val)}
+            onSizeChange={(val) => handleSizeChange(val)}
             onStart={() => handleStart()}
           />
-        </div>
+          </div>
       ) : (
-        <h1>ClientGame</h1>
-        // <ClientGame socket={socket.current} />
+        <ClientGame socket={socket} />
       )}
     </div>
   );

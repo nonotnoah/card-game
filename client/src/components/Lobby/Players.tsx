@@ -1,34 +1,41 @@
-import { useEffect, useState } from "react"
 import { Socket } from "socket.io-client"
+import Lobby from "./Lobby"
+
 interface MySocket extends Socket {
   [key: string]: any
 }
-interface SocketProps {
+interface PlayerProps {
   socket: MySocket
+  onUsernameSubmit: (username: string) => void
+  onCancel: () => void
 }
-export default function Players({ socket }: SocketProps) {
-  const [connectedPlayers, setConnectedPlayers] = useState([socket] as MySocket[])
 
-  useEffect(() => {
-    // update connectedPlayers list
-    socket.on('updatePlayers', (players) => {
-      setConnectedPlayers(players)
-    })
-
-    return (): void => {
-      socket.removeListener('updatePlayers')
-    }
-  }, [socket])
-
+export default function Players({ socket, onUsernameSubmit, onCancel }: PlayerProps) {
+  const handleUsernameSubmit = (username: string) => {
+    onUsernameSubmit(username)
+  }
+  const handleCancel = () => {
+    onCancel()
+  }
   return (
-    <ul className="player-list">
-      {connectedPlayers.map((player: MySocket) => {
-        return (
-          <li className={player.isHost ? 'host' : 'guest'}>
-            {player.username}
-          </li>
-        )
-      })}
-    </ul>
+    <div className="wrapper">
+      <div className="title">Players</div>
+      <div className="guy-wrapper">
+        <Lobby socket={socket} />
+        <img src="" alt="" />
+      </div>
+      <div className="username-wrapper">
+        <input
+          onSubmit={() => handleUsernameSubmit('')}
+          className="username"
+          type="text"
+          placeholder="Enter your name" id="name"
+        />
+        <button className="submit-button">{'>'}</button>
+      </div>
+      <div className="menu-button">
+        <button onClick={() => handleCancel()} className="cancel">Home</button>
+      </div>
+    </div >
   )
 }
