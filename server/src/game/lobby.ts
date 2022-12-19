@@ -8,6 +8,11 @@ interface MySocket extends Socket {
 interface Players {
   [userID: string]: MySocket
 }
+interface SizeProps {
+  numberOfSymbols: number
+  sizeName: string
+  sizeDescription: string
+}
 
 export default class Lobby {
   gameID
@@ -31,6 +36,7 @@ export default class Lobby {
     let keys = Object.keys(this.connectedPlayers)
     console.log('room players', keys)
     if (socket.isHost && keys.length > 1) {
+      socket.broadcast.to(this.gameID).emit('start') // JoinLobbyRoom picks this up
       this.Game = new Game(
         this.io,
         this.connectedPlayers,
@@ -75,14 +81,22 @@ export default class Lobby {
     }
   }
 
+  sizeChange(socket: MySocket, res: SizeProps) {
+    socket.broadcast.to(this.gameID).emit('sizeChange', res)
+  }
+
   endGame(socket: MySocket) {
     this.gameStarted = false
   }
 
   // add listener to socket
   addListenerTo(socket: MySocket, listener: string, func: Function) {
-    socket.on(listener, () => {
-      func(socket)
+    socket.on(listener, (res?: any) => {
+      if (res) {
+        func(socket, res)
+      } else {
+        func(socket)
+      }
     })
   }
 
