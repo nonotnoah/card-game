@@ -2,7 +2,7 @@ import { useEffect, useState, useRef, MutableRefObject } from 'react'
 import '../styles/App.css'
 import { io, Socket } from 'socket.io-client'
 import ClientGame from './ClientGame'
-import Lobbies from './Lobbies'
+import Lobbies from './Lobby/Lobbies'
 
 const URL: string = 'http://localhost:5000'
 

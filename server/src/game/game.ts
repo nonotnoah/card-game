@@ -22,16 +22,16 @@ class Game {
   players
   deck
   gameID
-  serverStorage
+  // serverStorage
   cards
-  constructor(io: Server, gameID: string, players: Players, serverStorage?: ServerSessionStore) {
+  constructor(io: Server, players: Players, serverStorage?: ServerSessionStore) {
     this.io = io
 
     this.players = players
-    this.gameID = gameID
-    this.joinRoom(this.players, this.gameID)
+    this.gameID = players[0].gameID
+    // this.joinRoom(this.players, this.gameID)
 
-    this.serverStorage = serverStorage
+    // this.serverStorage = serverStorage
 
     // dobble numbers: 3, 7, 13, 21
     this.deck = new Deck(6, animals)
