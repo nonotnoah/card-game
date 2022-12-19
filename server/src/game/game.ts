@@ -4,6 +4,7 @@ import { animals } from '../utils/animals'
 import { v4 as uuidv4 } from 'uuid'
 import ServerSessionStore from '../sessionStore'
 import { connect } from 'http2'
+import Lobby from './lobby'
 
 interface MySocket extends Socket {
   [key: string]: any
@@ -24,66 +25,21 @@ class Game {
   gameID
   // serverStorage
   cards
-  constructor(io: Server, players: Players, serverStorage?: ServerSessionStore) {
+  constructor(io: Server, players: Players, gameID: string) {
     this.io = io
 
     this.players = players
-    this.gameID = players[0].gameID
-    // this.joinRoom(this.players, this.gameID)
-
-    // this.serverStorage = serverStorage
-
+    this.gameID = gameID
     // dobble numbers: 3, 7, 13, 21
     this.deck = new Deck(6, animals)
     this.cards = {} as DrawPayload
     this.playGame()
   }
 
-  // rules
-  correct(guess: string, socket: MySocket) {
-    if (guess === this.cards.match) {
-      console.log(socket.id, 'Correct guess!', guess)
-      // draw next card and determine match
-      this.nextTurn()
-      if (this.cards.match === '') {
-        this.emitToRoom('game over')
-      }
-    }
-  }
-
-  reconnect(socket: MySocket) {
-    socket.emit('reconnect', this.cards)
-    this.players[socket.userID] = socket // update with fresh socket
-    this.removeAllListeners()
-    this.resumeGame()
-  }
-
-  // join all players to game unique room
-  joinRoom(players: Players, gameID: string) {
-    Object.values(players).map(socket => {
-      socket.join(gameID)
-      // this.serverStorage.saveSession(socket.sessionID, {
-      //     roomID: socket.roomID,
-      //     // these don't need to be here but I'm too tired to 
-      //     // fight with types right now
-      //     userID: socket.userID,
-      //     username: socket.username,
-      //     connected: true
-      // })
-      // console.log(socket.id, 'joined', roomId)
-    })
-  }
   emitToRoom(event: string, ...args: any[]) {
     this.io.in(this.gameID).emit(event, ...args)
   }
 
-  _addOnAnyListener(func: Function) {
-    Object.values(this.players).map(socket => {
-      socket.onAny((eventName) => {
-        func(eventName, socket)
-      })
-    })
-  }
   // add event listener for all sockets in room
   addListenerToAll(listener: string, func: Function) {
     let names: string[] = []
@@ -104,6 +60,28 @@ class Game {
     console.log('Removed all listeners from room:', this.gameID)
   }
 
+  // this is called in index.ts
+  reconnect(socket: MySocket) {
+    socket.emit('reconnect', this.cards)
+    this.players[socket.userID] = socket // update with fresh socket
+    this.removeAllListeners()
+    this.resumeGame()
+  }
+
+  // ---
+  // rules
+  correct(guess: string, socket: MySocket) {
+    if (guess === this.cards.match) {
+      console.log(socket.id, 'Correct guess!', guess)
+      // draw next card and determine match
+      this.nextTurn()
+      if (this.cards.match === '') {
+        this.emitToRoom('gameOver')
+      }
+    }
+  }
+  // ---
+
   nextTurn() {
     this.cards.card1 = this.deck.drawCard()
     this.cards.card2 = this.deck.drawCard()
@@ -117,33 +95,20 @@ class Game {
   }
 
   playGame() {
+    // this triggers all sockets to 
+    // save gameID in case of potential reconnect
     this.emitToRoom('gameID', this.gameID)
     this.nextTurn()
 
     this.addListenerToAll('correct', (guess: string, socket: MySocket) => {
       this.correct(guess, socket)
     })
-
-    // this.addListenerToAll('correct', (guess: string, socket: MySocket) => {
-    //     if (guess === this.match) {
-    //         console.log(socket.id, 'Correct guess!', guess)
-    //         // draw next card and determine match
-    //         this.match = this.nextTurn().match
-    //         if (this.match === '') {
-    //             this.emitToRoom('game over')
-    //         }
-    //     }
-    // })
   }
 
   resumeGame() {
-    this.emitToRoom('gameID', this.gameID)
     this.addListenerToAll('correct', (guess: string, socket: MySocket) =>
       this.correct(guess, socket)
     )
-    // this.addListenerToAll('correct', (message: string, socket: MySocket) =>
-    //     this.message(message, socket)
-    // )
   }
 
   endGame() {

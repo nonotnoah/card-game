@@ -27,6 +27,8 @@ export default function HostLobbyRoom({ socket, gameID }: LobbyProps) {
   const handleUsernameSubmit = (username: string) => { }
   const handleCancel = () => {
     socket.emit('cancel')
+    sessionStorage.removeItem('sessionID')
+    socket.disconnect()
   }
   const handleStart = () => {
     socket.emit('start')
@@ -43,8 +45,7 @@ export default function HostLobbyRoom({ socket, gameID }: LobbyProps) {
           <div className="profile-wrapper">
             <div className="title">Players</div>
             <div className="guy-wrapper">
-              {/* <Players socket={socket.current}/> */}
-              <Players />
+              <Players socket={socket}/>
               <img src="" alt="" />
             </div>
             <div className="username-wrapper">

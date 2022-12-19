@@ -14,8 +14,6 @@ export default function Lobbies() {
   const [join, setJoin] = useState(false)
   const gameID = useRef('')
 
-  const [hostName, setHostName] = useState('userID')
-
   const socket = useRef<MySocket>(io(URL, { autoConnect: false }))
 
   useEffect(() => {
@@ -26,30 +24,13 @@ export default function Lobbies() {
 
     // save session
     socket.current.on("session", ({ sessionID, userID }) => {
-      // attach the session ID to tab storage
       socket.current.auth = { sessionID };
-      // save the userID
       socket.current.userID = userID
       // store in sessionStorage. this should implement localStorage in live build
       sessionStorage.setItem("sessionID", sessionID);
       console.log("set sessionID:", sessionID);
     });
     
-    // save room
-    socket.current.on("gameID", (gameID) => {
-      sessionStorage.setItem("gameID", gameID);
-    });
-
-    // when current host cancels, set new host
-    socket.current.on('newHost', (newHost: string) => {
-      if (newHost == socket.current.userID) {
-        socket.current.isHost = true
-        setHost(true)
-        setJoin(false)
-      }
-        setHostName(newHost)
-    })
-
     return (): void => {
       socket.current.removeAllListeners();
     };

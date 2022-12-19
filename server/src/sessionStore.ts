@@ -27,6 +27,10 @@ class ServerSessionStore extends SessionStore {
     this.sessions.set(id, session);
   }
 
+  deleteSession(id: string) {
+    this.sessions.delete(id)
+  }
+
   findAllSessions() {
     return [...this.sessions.values()];
   }
