@@ -49,7 +49,7 @@ io.use((socket: MySocket, next) => {
   const isHost = socket.handshake.auth.isHost
   const gameID = socket.handshake.auth.gameID
   socket.sessionID = randomID()
-  socket.userID = randomID() // TODO: is this needed?
+  socket.userID = randomID()
   socket.username = username
   socket.gameID = gameID
   socket.isHost = isHost
@@ -119,7 +119,7 @@ io.on('connection', (socket: MySocket) => {
   })
 
   socket.on('disconnect', async () => {
-    const matchingSockets = await io.in(socket.roomID).fetchSockets();
+    const matchingSockets = await io.in(socket.gameID).fetchSockets();
     const isDisconnected = matchingSockets.length === 0;
     if (isDisconnected) {
       // notify other users
