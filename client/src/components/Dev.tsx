@@ -9,7 +9,8 @@ import HostLobbyRoom from './Lobby/HostLobbyRoom';
 
 function Dev() {
   return (
-    <HostLobbyRoom />
+    // <HostLobbyRoom />
+    <></>
 
   )
 }

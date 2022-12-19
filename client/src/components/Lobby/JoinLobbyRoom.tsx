@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, MutableRefObject } from 'react'
-import '../styles/App.css'
+import '../../styles/LobbyRoom.scss'
 import { io, Socket } from 'socket.io-client'
 import ClientGame from '../ClientGame'
 
