@@ -47,11 +47,12 @@ export default class Lobby {
     if (socket.isHost && players.length > 0) {
       let newHost = this.connectedPlayers[0]
       newHost.isHost = true
-      socket.to(socket.gameID).emit('newHost', newHost.userID)
+      this.emitToRoom('newHost', newHost.userID)
     }
-    // socket disconnects on clientside, so leaveLobby is called
-    // in the disconnect method!
+    // socket disconnects on clientside, so leaveLobby and updatePlayers
+    // are called in the disconnect method!
     // this.leaveLobby(socket)
+    // this.emitToRoom('updatePlayers', players)
   }
 
   async disconnect(socket: MySocket) {

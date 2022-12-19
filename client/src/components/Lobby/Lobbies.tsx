@@ -30,13 +30,21 @@ export default function Lobbies() {
       sessionStorage.setItem("sessionID", sessionID);
       console.log("set sessionID:", sessionID);
     });
-    
+
+    // open host options if socket becomes host
+    socket.current.on('newHost', (userID: string) => {
+      if (socket.current.userID == userID) {
+        setHost(true)
+        setJoin(false)
+      }
+    })
+
     return (): void => {
       socket.current.removeAllListeners();
     };
   }, [socket.current]);
 
-  function getRandomUsername() { return 'meat'} //TODO: make this animal names
+  function getRandomUsername() { return 'meat' } //TODO: make this animal names
   const logIn = () => {
     const username = getRandomUsername()
     socket.current.auth = { username, gameID, isHost }
