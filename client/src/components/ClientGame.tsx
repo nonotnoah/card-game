@@ -36,27 +36,6 @@ function ClientGame({ socket }: SocketProps) {
   });
   // socket event listeners
   useEffect(() => {
-    // connect error
-    socket.on("connect_error", (err) => {
-      console.log(`connect_error due to ${err.message}`);
-    });
-
-    // save session
-    socket.on("session", ({ sessionID, userID }) => {
-      // attach the session ID to tab storage
-      socket.auth = { sessionID };
-      // save the userID
-      // socket.userID = userID
-      // store in sessionStorage. this should implement localStorage in live build
-      sessionStorage.setItem("sessionID", sessionID);
-      console.log("set sessionID:", sessionID);
-    });
-
-    // save room
-    socket.on("gameID", (gameID) => {
-      sessionStorage.setItem("gameID", gameID);
-    });
-
     // draw card
     socket.on("draw", (val: DrawPayload) => {
       setCards(val);
