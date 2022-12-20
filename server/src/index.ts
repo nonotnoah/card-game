@@ -81,21 +81,21 @@ io.on('connection', (socket: MySocket) => {
   // let playerIDs = serverStorage.findAllSessions()
   // console.log('sessions:\n', ...playerIDs)
 
-  socket.on('disconnect', () => {
-    // notify other users
-    socket.broadcast.emit("user disconnected", socket.userID);
-    // update the connection status of the session
-    serverStorage.saveSession(socket.sessionID, {
-      userID: socket.userID,
-      username: socket.username,
-      gameID: socket.gameID,
-      isHost: socket.isHost,
-      connected: false
-    })
-    currentLobbies[socket.gameID].leaveLobby(socket)
-    console.log('Socket Closed: ', socket.userID)
-    console.log(serverStorage.findAllSessions())
-  })
+ // socket.on('disconnect', () => {
+  //   // notify other users
+  //   socket.broadcast.emit("user disconnected", socket.userID);
+  //   // update the connection status of the session
+  //   serverStorage.saveSession(socket.sessionID, {
+  //     userID: socket.userID,
+  //     username: socket.username,
+  //     gameID: socket.gameID,
+  //     isHost: socket.isHost,
+  //     connected: false
+  //   })
+  //   currentLobbies[socket.gameID].leaveLobby(socket)
+  //   console.log('Socket Closed: ', socket.userID)
+  //   console.log(serverStorage.findAllSessions())
+  // })
 
 })
 

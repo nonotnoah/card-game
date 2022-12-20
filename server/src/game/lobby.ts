@@ -55,11 +55,13 @@ export default class Lobby {
     this.gameStarted = true
   }
 
-  cancel(socket: MySocket) {
+  cancel = (socket: MySocket) => {
+    console.log(socket.userID, 'cancelled')
     this.serverStorage.deleteSession(socket.sessionID)
+    this.leaveLobby(socket)
     const players = Object.values(this.connectedPlayers)
     if (socket.isHost && players.length > 0) {
-      let newHost = this.connectedPlayers[0]
+      let newHost = players[0]
       newHost.isHost = true
       this.emitToRoom('newHost', newHost.userID)
     }
@@ -70,25 +72,28 @@ export default class Lobby {
   }
 
 
-  //   async disconnect(socket: MySocket) {
-  //   const matchingSockets = await this.io.in(socket.gameID).fetchSockets();
-  //   const isDisconnected = matchingSockets.length === 0;
-  //   if (isDisconnected) {
-  //     // notify other users
-  //     socket.broadcast.emit("user disconnected", socket.userID);
-  //     // update the connection status of the session
-  //     this.serverStorage.saveSession(socket.sessionID, {
-  //       userID: socket.userID,
-  //       username: socket.username,
-  //       gameID: socket.gameID,
-  //       isHost: socket.isHost,
-  //       connected: false,
-  //     });
-  //     this.leaveLobby(socket)
-  //     console.log('Socket Closed: ', socket.userID)
-  //     console.log(this.serverStorage.findAllSessions())
-  //   }
+  // async disconnect(socket: MySocket) {
+  // for some reason this isn't triggering on tab close
+  disconnect = (socket: MySocket) => {
+    // const matchingSockets = await this.io.in(socket.gameID).fetchSockets();
+    // const isDisconnected = matchingSockets.length === 0;
+    // if (isDisconnected) {
+    // notify other users
+    socket.broadcast.emit("user disconnected", socket.userID);
+    // update the connection status of the session
+    this.serverStorage.saveSession(socket.sessionID, {
+      userID: socket.userID,
+      username: socket.username,
+      gameID: socket.gameID,
+      isHost: socket.isHost,
+      connected: false,
+    });
+    this.leaveLobby(socket)
+    console.log('Socket Closed: ', socket.userID)
+    console.log(this.serverStorage.findAllSessions())
+  }
   // }
+
 
   sizeChange(socket: MySocket, res: SizeProps) {
     socket.broadcast.to(this.gameID).emit('sizeChange', res)
@@ -121,7 +126,7 @@ export default class Lobby {
     // add lobby listeners
     this.addListenerTo(socket, 'start', this.start)
     this.addListenerTo(socket, 'cancel', this.cancel)
-    // this.addListenerTo(socket, 'disconnect', this.disconnect)
+    this.addListenerTo(socket, 'disconnect', this.disconnect)
     this.addListenerTo(socket, 'end', this.endGame)
 
     // join socket to room
@@ -143,7 +148,7 @@ export default class Lobby {
       connected: true
     })
     console.log('server saving', socket.username + "'s session as:", socket.userID)
-    console.log('called servstore', this.serverStorage.findAllSessions())
+    // console.log('called servstore', this.serverStorage.findAllSessions())
 
     // update playerlist
     const players = this.getPlayers()
