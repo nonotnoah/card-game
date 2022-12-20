@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react"
 import { Socket } from "socket.io-client"
 import '../../styles/Lobby.scss'
+import animalEmojis from "../../utils/animalEmojis"
+
 interface MySocket extends Socket {
   [key: string]: any
 }
@@ -19,6 +21,7 @@ interface PlayerPacket {
 }
 export default function Lobby({ socket }: SocketProps) {
   const [connectedPlayers, setConnectedPlayers] = useState({} as PlayerPacket)
+  const players = Object.values(connectedPlayers)
   console.log(connectedPlayers)
 
   useEffect(() => {
@@ -36,14 +39,14 @@ export default function Lobby({ socket }: SocketProps) {
 
   return (
     <ul className="player-list">
-      {Object.values(connectedPlayers).map((player) => {
+      {players.map((player) => {
         return (
           <li
             className={`
             ${player.isHost ? 'host' : 'guest'}
             ${player.userID == socket.userID ? 'you' : ''} 
             `}>
-            {player.username}
+            {emoji}{player.username}
           </li>
         )
       })}
