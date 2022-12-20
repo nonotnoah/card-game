@@ -53,9 +53,9 @@ class Game {
   }
   // clear all listeners to prevent duplication on reconnection
   // there's probably a better way to do this
-  removeAllListeners() {
+  removeListenersFromAll(listener: Function) {
     Object.values(this.players).map(socket => {
-      socket.removeListener('correct', this.correct)
+      socket.removeListener('correct', () => listener())
     })
     console.log('Removed all listeners from room:', this.gameID)
   }
@@ -64,8 +64,10 @@ class Game {
   reconnect(socket: MySocket) {
     socket.emit('reconnect', this.cards)
     this.players[socket.userID] = socket // update with fresh socket
-    this.removeAllListeners()
-    this.resumeGame()
+    this.removeListenersFromAll(this.correct) // refresh listeners
+    this.addListenerToAll('correct', (guess: string, socket: MySocket) =>
+      this.correct(guess, socket)
+    )
   }
 
   // ---
@@ -95,20 +97,11 @@ class Game {
   }
 
   playGame() {
-    // this triggers all sockets to 
-    // save gameID in case of potential reconnect
-    this.emitToRoom('gameID', this.gameID)
     this.nextTurn()
 
     this.addListenerToAll('correct', (guess: string, socket: MySocket) => {
       this.correct(guess, socket)
     })
-  }
-
-  resumeGame() {
-    this.addListenerToAll('correct', (guess: string, socket: MySocket) =>
-      this.correct(guess, socket)
-    )
   }
 
   endGame() {

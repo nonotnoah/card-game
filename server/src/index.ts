@@ -66,37 +66,34 @@ let currentLobbies: Lobbies = {}
 io.on('connection', (socket: MySocket) => {
   console.log('socket connected:', socket.userID)
   console.log(socket.sessionID, socket.userID, socket.gameID, socket.isHost)
+
   // create new lobby if host, then join
-  if (socket.isHost && !currentLobbies[socket.gameID]) {
-    currentLobbies[socket.gameID] = new Lobby(socket.gameID, io, serverStorage)
+  if (!currentLobbies[socket.gameID]) {
+    if (socket.isHost) {
+      currentLobbies[socket.gameID] = new Lobby(socket.gameID, io, serverStorage)
+    } else {
+      socket.emit('lobbyNotFound')
+      console.log('tried to join nonexistent lobby')
+    }
+    currentLobbies[socket.gameID].joinLobby(socket)
   }
-  currentLobbies[socket.gameID].joinLobby(socket)
 
   // reconnect if applicable
   if (currentLobbies[socket.gameID].gameStarted) {
     currentLobbies[socket.gameID].Game.reconnect(socket)
   }
 
+  // delete lobby if everyone disconnects
+  socket.on('disconnect', () => {
+    const numConnectedPlayers = Object.keys(currentLobbies[socket.gameID].connectedPlayers).length
+    if (numConnectedPlayers == 0) {
+      delete currentLobbies[socket.gameID]
+      console.log('deleting empty lobby')
+    }
+  })
   // debug currently connected players
   // let playerIDs = serverStorage.findAllSessions()
   // console.log('sessions:\n', ...playerIDs)
-
- // socket.on('disconnect', () => {
-  //   // notify other users
-  //   socket.broadcast.emit("user disconnected", socket.userID);
-  //   // update the connection status of the session
-  //   serverStorage.saveSession(socket.sessionID, {
-  //     userID: socket.userID,
-  //     username: socket.username,
-  //     gameID: socket.gameID,
-  //     isHost: socket.isHost,
-  //     connected: false
-  //   })
-  //   currentLobbies[socket.gameID].leaveLobby(socket)
-  //   console.log('Socket Closed: ', socket.userID)
-  //   console.log(serverStorage.findAllSessions())
-  // })
-
 })
 
 server.listen(5000, () => {

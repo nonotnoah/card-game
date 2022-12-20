@@ -47,11 +47,6 @@ function ClientGame({ socket }: SocketProps) {
       console.log("sending current card", val);
     });
 
-    // save room
-    socket.on("gameID", (gameID) => {
-      sessionStorage.setItem("gameID", gameID);
-    });
-    
     // cb
     return (): void => {
       socket.removeAllListeners();

@@ -28,6 +28,7 @@ export default function HostLobbyRoom({ socket, gameID }: LobbyProps) {
   const handleCancel = () => {
     socket.emit('cancel')
     sessionStorage.removeItem('sessionID')
+    sessionStorage.removeItem("gameID");
     socket.disconnect()
   }
   const handleStart = () => {

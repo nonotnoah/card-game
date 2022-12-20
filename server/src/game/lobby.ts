@@ -55,15 +55,26 @@ export default class Lobby {
     this.gameStarted = true
   }
 
-  cancel = (socket: MySocket) => {
-    console.log(socket.userID, 'cancelled')
-    this.serverStorage.deleteSession(socket.sessionID)
-    this.leaveLobby(socket)
+  killLobby() {
+
+  }
+
+  // make oldest connection host
+  newHost() {
     const players = Object.values(this.connectedPlayers)
-    if (socket.isHost && players.length > 0) {
+    if (players.length > 0) {
       let newHost = players[0]
       newHost.isHost = true
       this.emitToRoom('newHost', newHost.userID)
+    }
+  }
+
+  // removes socket from server storage and finds new host if needed
+  cancel = (socket: MySocket) => {
+    console.log(socket.userID, 'cancelled')
+    this.serverStorage.deleteSession(socket.sessionID)
+    if (socket.isHost) {
+      this.newHost()
     }
     // socket disconnects on clientside, so leaveLobby and updatePlayers
     // are called in the disconnect method!
@@ -88,12 +99,19 @@ export default class Lobby {
       isHost: socket.isHost,
       connected: false,
     });
-    this.leaveLobby(socket)
+    // if game started, find new host but keep session data in server store
+    if (this.gameStarted && socket.isHost) {
+      this.newHost()
+      this.leaveLobby(socket)
+    } else if (!this.gameStarted) {
+      this.cancel(socket)
+      this.leaveLobby(socket)
+    }
     console.log('Socket Closed: ', socket.userID)
     console.log(this.serverStorage.findAllSessions())
+    console.log('lobby.ts disconnect')
   }
   // }
-
 
   sizeChange(socket: MySocket, res: SizeProps) {
     socket.broadcast.to(this.gameID).emit('sizeChange', res)
@@ -125,9 +143,13 @@ export default class Lobby {
 
     // add lobby listeners
     this.addListenerTo(socket, 'start', this.start)
-    this.addListenerTo(socket, 'cancel', this.cancel)
+    // not needed because 'disconnect' is called anyway
+    // this.addListenerTo(socket, 'cancel', this.cancel) 
     this.addListenerTo(socket, 'disconnect', this.disconnect)
     this.addListenerTo(socket, 'end', this.endGame)
+    if (!socket.isHost) {
+      this.addListenerTo(socket, 'sizeChange', this.sizeChange)
+    }
 
     // join socket to room
     socket.join(socket.gameID)

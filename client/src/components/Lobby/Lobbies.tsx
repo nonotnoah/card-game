@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react"
 import { io, Socket } from "socket.io-client"
 import createRoomID from "../../utils/createRoomID"
+import getRandomUsername from "../../utils/getRandomUsername"
 import HostLobbyRoom from "./HostLobbyRoom"
 import JoinLobbyRoom from "./JoinLobbyRoom"
 
@@ -28,6 +29,7 @@ export default function Lobbies() {
       socket.current.userID = userID
       // store in sessionStorage. this should implement localStorage in live build
       sessionStorage.setItem("sessionID", sessionID);
+      sessionStorage.setItem('gameID', gameID.current)
       console.log("set sessionID:", sessionID);
     });
 
@@ -39,12 +41,15 @@ export default function Lobbies() {
       }
     })
 
+    socket.current.on('lobbyNotFound', () => {
+      // TODO: implement
+    })
+
     return (): void => {
       socket.current.removeAllListeners();
     };
   }, [socket.current]);
 
-  function getRandomUsername() { return 'meat' } //TODO: make this animal names
   const logIn = (gameID: string, isHost: boolean) => {
     const username = getRandomUsername()
     socket.current.auth = { username, gameID, isHost }
@@ -54,7 +59,7 @@ export default function Lobbies() {
   const createRoom = () => {
     // gameID.current = createRoomID()
     gameID.current = '12345'
-    setIsHost(true) // this variable is accessed on the same render it's set
+    setIsHost(true)
     setIsJoin(false)
     logIn(gameID.current, true)
   }
