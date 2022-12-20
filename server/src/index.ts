@@ -65,7 +65,7 @@ let currentLobbies: Lobbies = {}
 
 io.on('connection', (socket: MySocket) => {
   console.log('socket connected:', socket.userID)
-
+  console.log(socket.sessionID, socket.userID, socket.gameID, socket.isHost)
   // create new lobby if host, then join
   if (socket.isHost && !currentLobbies[socket.gameID]) {
     currentLobbies[socket.gameID] = new Lobby(socket.gameID, io, serverStorage)

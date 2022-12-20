@@ -10,8 +10,8 @@ interface MySocket extends Socket {
 }
 
 export default function Lobbies() {
-  const [isHost, setHost] = useState(false)
-  const [join, setJoin] = useState(false)
+  const [isHost, setIsHost] = useState(false)
+  const [isGuest, setIsJoin] = useState(false)
   const gameID = useRef('')
 
   const socket = useRef<MySocket>(io(URL, { autoConnect: false }))
@@ -34,8 +34,8 @@ export default function Lobbies() {
     // open host options if socket becomes host
     socket.current.on('newHost', (userID: string) => {
       if (socket.current.userID == userID) {
-        setHost(true)
-        setJoin(false)
+        setIsHost(true)
+        setIsJoin(false)
       }
     })
 
@@ -45,7 +45,7 @@ export default function Lobbies() {
   }, [socket.current]);
 
   function getRandomUsername() { return 'meat' } //TODO: make this animal names
-  const logIn = () => {
+  const logIn = (gameID: string, isHost: boolean) => {
     const username = getRandomUsername()
     socket.current.auth = { username, gameID, isHost }
     socket.current.connect()
@@ -54,23 +54,23 @@ export default function Lobbies() {
   const createRoom = () => {
     // gameID.current = createRoomID()
     gameID.current = '12345'
-    setHost(true)
-    setJoin(false)
-    logIn()
+    setIsHost(true) // this variable is accessed on the same render it's set
+    setIsJoin(false)
+    logIn(gameID.current, true)
   }
 
   const joinRoom = (id: string) => {
     gameID.current = id
-    setHost(false)
-    setJoin(true)
-    logIn()
+    setIsHost(false)
+    setIsJoin(true)
+    logIn(gameID.current, false)
   }
 
   return (
     <div className="wrapper">
       {isHost ? (
         <HostLobbyRoom socket={socket.current} gameID={gameID.current}></HostLobbyRoom>
-      ) : join ? (
+      ) : isGuest ? (
         <JoinLobbyRoom socket={socket.current} gameID={gameID.current}></JoinLobbyRoom>
       ) : (
         <div className="wrapper">

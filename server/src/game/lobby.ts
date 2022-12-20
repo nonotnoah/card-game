@@ -13,6 +13,14 @@ interface SizeProps {
   sizeName: string
   sizeDescription: string
 }
+interface PlayerPacket {
+  [userID: string]: {
+    userID: string,
+    username: string,
+    isHost: Boolean
+  }
+}
+
 
 export default class Lobby {
   gameID
@@ -121,6 +129,7 @@ export default class Lobby {
     // send session details to newly connected socket
     socket.emit('session', {
       sessionID: socket.sessionID,
+      userID: socket.userID
     })
     console.log('emitting session to:', socket.userID)
 
@@ -135,7 +144,8 @@ export default class Lobby {
     console.log('server saving', socket.username + "'s session as:", socket.userID)
 
     // update playerlist
-    const players = Object.values(this.connectedPlayers)
+    const players = this.getPlayers()
+    console.log('sending', players, 'to players')
     this.emitToRoom('updatePlayers', players)
   }
 
@@ -143,7 +153,20 @@ export default class Lobby {
     delete this.connectedPlayers[socket.userID]
 
     // update playerlist
-    const players = Object.values(this.connectedPlayers)
+    const players = this.getPlayers()
+    console.log('sending', players, 'to players')
     this.emitToRoom('updatePlayers', players)
+  }
+
+  getPlayers() {
+    let playerPacket: PlayerPacket = {}
+    Object.values(this.connectedPlayers).map(socket => {
+      playerPacket[socket.userID] = { 
+        userID: socket.userID,
+        username: socket.username, 
+        isHost: socket.isHost 
+      }
+    })
+    return playerPacket
   }
 }
