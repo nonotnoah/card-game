@@ -25,7 +25,7 @@ interface MySocket extends Socket {
   [key: string]: any
 }
 
-const serverStorage = new ServerSessionStore()
+const serverStorage = new ServerSessionStore() // I wish this was an api
 
 io.use((socket: MySocket, next) => {
   // on reconnect this will be the 'sessionID' value in sessionStorage
@@ -78,8 +78,25 @@ io.on('connection', (socket: MySocket) => {
   }
 
   // debug currently connected players
-  let playerIDs = serverStorage.findAllSessions()
-  console.log('sessions:\n', ...playerIDs)
+  // let playerIDs = serverStorage.findAllSessions()
+  // console.log('sessions:\n', ...playerIDs)
+
+  socket.on('disconnect', () => {
+    // notify other users
+    socket.broadcast.emit("user disconnected", socket.userID);
+    // update the connection status of the session
+    serverStorage.saveSession(socket.sessionID, {
+      userID: socket.userID,
+      username: socket.username,
+      gameID: socket.gameID,
+      isHost: socket.isHost,
+      connected: false
+    })
+    currentLobbies[socket.gameID].leaveLobby(socket)
+    console.log('Socket Closed: ', socket.userID)
+    console.log(serverStorage.findAllSessions())
+  })
+
 })
 
 server.listen(5000, () => {

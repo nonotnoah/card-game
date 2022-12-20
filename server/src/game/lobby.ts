@@ -69,25 +69,26 @@ export default class Lobby {
     // this.emitToRoom('updatePlayers', players)
   }
 
-  async disconnect(socket: MySocket) {
-    const matchingSockets = await this.io.in(socket.gameID).fetchSockets();
-    const isDisconnected = matchingSockets.length === 0;
-    if (isDisconnected) {
-      // notify other users
-      socket.broadcast.emit("user disconnected", socket.userID);
-      // update the connection status of the session
-      this.serverStorage.saveSession(socket.sessionID, {
-        userID: socket.userID,
-        username: socket.username,
-        gameID: socket.gameID,
-        isHost: socket.isHost,
-        connected: false,
-      });
-      this.leaveLobby(socket)
-      console.log('Socket Closed: ', socket.userID)
-      console.log(this.serverStorage.findAllSessions())
-    }
-  }
+
+  //   async disconnect(socket: MySocket) {
+  //   const matchingSockets = await this.io.in(socket.gameID).fetchSockets();
+  //   const isDisconnected = matchingSockets.length === 0;
+  //   if (isDisconnected) {
+  //     // notify other users
+  //     socket.broadcast.emit("user disconnected", socket.userID);
+  //     // update the connection status of the session
+  //     this.serverStorage.saveSession(socket.sessionID, {
+  //       userID: socket.userID,
+  //       username: socket.username,
+  //       gameID: socket.gameID,
+  //       isHost: socket.isHost,
+  //       connected: false,
+  //     });
+  //     this.leaveLobby(socket)
+  //     console.log('Socket Closed: ', socket.userID)
+  //     console.log(this.serverStorage.findAllSessions())
+  //   }
+  // }
 
   sizeChange(socket: MySocket, res: SizeProps) {
     socket.broadcast.to(this.gameID).emit('sizeChange', res)
@@ -120,7 +121,7 @@ export default class Lobby {
     // add lobby listeners
     this.addListenerTo(socket, 'start', this.start)
     this.addListenerTo(socket, 'cancel', this.cancel)
-    this.addListenerTo(socket, 'disconnect', this.disconnect)
+    // this.addListenerTo(socket, 'disconnect', this.disconnect)
     this.addListenerTo(socket, 'end', this.endGame)
 
     // join socket to room
@@ -142,6 +143,7 @@ export default class Lobby {
       connected: true
     })
     console.log('server saving', socket.username + "'s session as:", socket.userID)
+    console.log('called servstore', this.serverStorage.findAllSessions())
 
     // update playerlist
     const players = this.getPlayers()
@@ -161,10 +163,10 @@ export default class Lobby {
   getPlayers() {
     let playerPacket: PlayerPacket = {}
     Object.values(this.connectedPlayers).map(socket => {
-      playerPacket[socket.userID] = { 
+      playerPacket[socket.userID] = {
         userID: socket.userID,
-        username: socket.username, 
-        isHost: socket.isHost 
+        username: socket.username,
+        isHost: socket.isHost
       }
     })
     return playerPacket
