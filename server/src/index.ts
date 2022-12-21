@@ -45,7 +45,6 @@ io.use((socket: MySocket, next) => {
       return next()
     }
   }
-  console.log('creating new session with auth:', socket.handshake.auth)
   const username = socket.handshake.auth.username
   const isHost = socket.handshake.auth.isHost
   const gameID = socket.handshake.auth.gameID
@@ -64,31 +63,34 @@ interface Lobbies {
 let currentLobbies: Lobbies = {}
 
 io.on('connection', (socket: MySocket) => {
-  console.log('socket connected:', socket.userID)
-  console.log(socket.sessionID, socket.userID, socket.gameID, socket.isHost)
+  console.log('socket connected:', socket.sessionID, socket.userID, socket.gameID, socket.isHost)
 
   // create new lobby if host, then join
-  if (!currentLobbies[socket.gameID]) {
-    if (socket.isHost) {
+  if (!currentLobbies[socket.gameID]) { // lobby doesn't exist
+    if (socket.isHost) { // is host
       currentLobbies[socket.gameID] = new Lobby(socket.gameID, io, serverStorage)
-    } else {
+      currentLobbies[socket.gameID].joinLobby(socket)
+    } else { // isn't host, lobby doesn't exist
       socket.emit('lobbyNotFound')
       console.log('tried to join nonexistent lobby')
     }
+  } else { // not host, lobby exists
+    socket.emit('lobbyFound')
     currentLobbies[socket.gameID].joinLobby(socket)
+    // reconnect if applicable
+    if (currentLobbies[socket.gameID].gameStarted) {
+      currentLobbies[socket.gameID].Game.reconnect(socket)
+    }
   }
 
-  // reconnect if applicable
-  if (currentLobbies[socket.gameID].gameStarted) {
-    currentLobbies[socket.gameID].Game.reconnect(socket)
-  }
-
-  // delete lobby if everyone disconnects
+  // delete lobby if lobby exists and everyone disconnects
   socket.on('disconnect', () => {
-    const numConnectedPlayers = Object.keys(currentLobbies[socket.gameID].connectedPlayers).length
-    if (numConnectedPlayers == 0) {
-      delete currentLobbies[socket.gameID]
-      console.log('deleting empty lobby')
+    if (currentLobbies[socket.gameID]) {
+      const numConnectedPlayers = Object.keys(currentLobbies[socket.gameID].connectedPlayers).length
+      if (numConnectedPlayers == 0) {
+        delete currentLobbies[socket.gameID]
+        console.log('deleting empty lobby')
+      }
     }
   })
   // debug currently connected players

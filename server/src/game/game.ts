@@ -97,6 +97,7 @@ class Game {
   }
 
   playGame() {
+    this.emitToRoom('start') 
     this.nextTurn()
 
     this.addListenerToAll('correct', (guess: string, socket: MySocket) => {

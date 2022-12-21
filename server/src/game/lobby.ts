@@ -9,9 +9,9 @@ interface Players {
   [userID: string]: MySocket
 }
 interface SizeProps {
-  numberOfSymbols: number
-  sizeName: string
-  sizeDescription: string
+  symbol: number
+  name: string
+  description: string
 }
 interface PlayerPacket {
   [userID: string]: {
@@ -29,6 +29,7 @@ export default class Lobby {
   serverStorage
   gameStarted
   Game: Game
+  currentSize
   constructor(gameID: string, io: Server, serverStorage: ServerSessionStore) {
     this.gameID = gameID
     this.io = io
@@ -36,6 +37,7 @@ export default class Lobby {
     this.serverStorage = serverStorage
     this.gameStarted = false
     this.Game = {} as Game // this might not work
+    this.currentSize = {symbol: 8, name: 'Normal', description: 'The standard experience'}
   }
 
   // rules
@@ -62,8 +64,8 @@ export default class Lobby {
   // make oldest connection host
   newHost() {
     const players = Object.values(this.connectedPlayers)
-    if (players.length > 0) {
-      let newHost = players[0]
+    if (players.length > 1) {
+      let newHost = players[1]
       newHost.isHost = true
       this.emitToRoom('newHost', newHost.userID)
     }
@@ -86,6 +88,7 @@ export default class Lobby {
   // async disconnect(socket: MySocket) {
   // for some reason this isn't triggering on tab close
   disconnect = (socket: MySocket) => {
+    console.log('lobby.ts disconnect')
     // const matchingSockets = await this.io.in(socket.gameID).fetchSockets();
     // const isDisconnected = matchingSockets.length === 0;
     // if (isDisconnected) {
@@ -100,25 +103,36 @@ export default class Lobby {
       connected: false,
     });
     // if game started, find new host but keep session data in server store
+    const players = Object.values(this.connectedPlayers)
     if (this.gameStarted && socket.isHost) {
-      this.newHost()
       this.leaveLobby(socket)
+      if (players.length > 0)
+        this.newHost()
     } else if (!this.gameStarted) {
       this.cancel(socket)
       this.leaveLobby(socket)
     }
     console.log('Socket Closed: ', socket.userID)
-    console.log(this.serverStorage.findAllSessions())
-    console.log('lobby.ts disconnect')
   }
   // }
 
-  sizeChange(socket: MySocket, res: SizeProps) {
-    socket.broadcast.to(this.gameID).emit('sizeChange', res)
+  sizeChange = (socket: MySocket, size: SizeProps) => {
+    this.currentSize = size
+    // console.log(this.currentSize);
+    this.emitToRoom('sizeChange', size)
+  }
+  needSizeChange = (socket: MySocket) => {
+    socket.emit('sizeChange', this.currentSize)
   }
 
   endGame(socket: MySocket) {
     this.gameStarted = false
+  }
+
+  needPlayers = (socket: MySocket) => {
+    const players = this.getPlayers()
+    console.log('sending', players, 'to', socket.username)
+    socket.emit('updatePlayers', players)
   }
 
   // add listener to socket
@@ -147,13 +161,13 @@ export default class Lobby {
     // this.addListenerTo(socket, 'cancel', this.cancel) 
     this.addListenerTo(socket, 'disconnect', this.disconnect)
     this.addListenerTo(socket, 'end', this.endGame)
-    if (!socket.isHost) {
-      this.addListenerTo(socket, 'sizeChange', this.sizeChange)
-    }
+    this.addListenerTo(socket, 'sizeChange', this.sizeChange)
+    this.addListenerTo(socket, 'needSizeChange', this.needSizeChange)
+    this.addListenerTo(socket, 'needPlayers', this.needPlayers)
 
     // join socket to room
     socket.join(socket.gameID)
-
+    
     // send session details to newly connected socket
     socket.emit('session', {
       sessionID: socket.sessionID,

@@ -11,23 +11,26 @@ interface MySocket extends Socket {
   [key: string]: any
 }
 interface LobbyProps {
+  children: never[] // ???????
   socket: MySocket
-  gameID: string
+  // gameID: string
+  onCancel: () => void
 }
 interface SizeProps {
-  numberOfSymbols: number
-  sizeName: string
-  sizeDescription: string
+  symbol: number
+  name: string
+  description: string
 }
 
 const URL: string = 'http://localhost:5000'
 
-export default function JoinLobbyRoom({ socket, gameID }: LobbyProps) {
+// export default function JoinLobbyRoom({ socket, gameID, onCancel }: LobbyProps) {
+export default function JoinLobbyRoom({ socket, onCancel }: LobbyProps) {
   const [waitingForPlayers, setWaitingForPlayers] = useState(true)
   const [size, setSize] = useState<SizeProps>({
-    numberOfSymbols: 8,
-    sizeName: 'Normal',
-    sizeDescription: 'The standard experience'
+    symbol: 8,
+    name: 'Normal',
+    description: 'The standard experience'
   })
 
   useEffect(() => {
@@ -42,11 +45,18 @@ export default function JoinLobbyRoom({ socket, gameID }: LobbyProps) {
     };
   }, [socket]);
 
+  useEffect(() => {
+    socket.emit('needSizeChange')
+  }, [])
+
   const handleUsernameSubmit = (username: string) => { }
+  // disconnect socket and call prop onCancel to get back to Lobbies.tsx
   const handleCancel = () => {
     socket.emit('cancel')
     sessionStorage.removeItem('sessionID')
+    sessionStorage.removeItem('gameID')
     socket.disconnect()
+    onCancel()
   }
 
   return (

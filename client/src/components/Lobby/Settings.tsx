@@ -1,38 +1,54 @@
-import { useState } from "react"
+import { useRef, useState } from "react"
 
 interface SettingsProps {
+  size: SizeProps
   onSizeChange: (val: {
-    numberOfSymbols: number
-    sizeName: string
-    sizeDescription: string
+    symbol: number
+    name: string
+    description: string
   }) => void
   onStart: () => void
 }
+interface SizeProps {
+  symbol: number
+  name: string
+  description: string
+}
 
-export default function Settings({ onSizeChange, onStart }: SettingsProps) {
-  const [numberOfSymbols, setNumberOfSymbols] = useState(8)
-  const [sizeName, setSizeName] = useState('Normal')
-  const [sizeDescription, setSizeDescription] = useState('The standard experience')
+export default function Settings({ size, onSizeChange, onStart }: SettingsProps) {
+  const numberOfSymbols = useRef(size.symbol)
+  const sizeName = useRef(size.name)
+  const sizeDescription = useRef(size.description)
 
   const handleClick = (sign: string) => {
     const sizeNumbers = [4, 8, 13]
     const sizeNames = ['Small', 'Normal', 'Large']
-    const sizeDescriptions = ['Faster pace', 'The standard experience', 'Gamers only.']
-    const currentNumber = sizeNumbers.indexOf(numberOfSymbols)
-    const currentName = sizeNames.indexOf(sizeName)
-    const currentDescription = sizeDescriptions.indexOf(sizeDescription)
+    const sizeDescriptions = ['Faster pace', 'The standard experience', 'More difficult']
+    const currentNumber = sizeNumbers.indexOf(numberOfSymbols.current)
+    const currentName = sizeNames.indexOf(sizeName.current)
+    const currentDescription = sizeDescriptions.indexOf(sizeDescription.current)
+    let symbol: number = 8
+    let name: string = 'Normal'
+    let description: string = 'The standard experience'
     if (sign == '-' && currentNumber != 0) {
-      setNumberOfSymbols(sizeNumbers[currentNumber - 1])
-      setSizeName(sizeNames[currentName - 1])
-      setSizeDescription(sizeDescriptions[currentDescription - 1])
+      symbol = sizeNumbers[currentNumber - 1]
+      name = sizeNames[currentName - 1]
+      description = sizeDescriptions[currentDescription - 1]
+      numberOfSymbols.current = symbol
+      sizeName.current = name
+      sizeDescription.current = description
+      onSizeChange({ symbol, name, description })
     }
     if (sign == '+' && currentNumber != 2) {
-      setNumberOfSymbols(sizeNumbers[currentNumber + 1])
-      setSizeName(sizeNames[currentName + 1])
-      setSizeDescription(sizeDescriptions[currentDescription + 1])
+      symbol = sizeNumbers[currentNumber + 1]
+      name = sizeNames[currentName + 1]
+      description = sizeDescriptions[currentDescription + 1]
+      numberOfSymbols.current = symbol
+      sizeName.current = name
+      sizeDescription.current = description
+      onSizeChange({ symbol, name, description })
     }
     // socket.to(socket.gameID).emit(numberOfSymbols)
-    onSizeChange({ numberOfSymbols, sizeName, sizeDescription })
   }
 
   const handleStart = () => {
@@ -45,13 +61,13 @@ export default function Settings({ onSizeChange, onStart }: SettingsProps) {
       <div className="symbols-wrapper">
         <div className="card-size-select-wrapper">
           <button onClick={() => handleClick('-')} className="left">-</button>
-          <span className="symbol-number">{numberOfSymbols}</span>
+          <span className="symbol-number">{size.symbol}</span>
           <button onClick={() => handleClick('+')} className="right">+</button>
         </div>
-        <div className="title-size">{sizeName}</div>
+        <div className="title-size">{size.name}</div>
       </div>
       <div className="info-wrapper">
-        <p className="size-info">{sizeDescription}</p>
+        <p className="size-info">{size.description}</p>
       </div>
       <div className="menu-button">
         <button onClick={() => handleStart()} className="start">Start Game</button>

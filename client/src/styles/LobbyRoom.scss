@@ -1,3 +1,8 @@
+*,
+*:after,
+*:before {
+  box-sizing: border-box;
+}
 div {
   // border: 1px solid gray;
 }
@@ -24,7 +29,7 @@ div {
 }
 
 .guy-wrapper {
-  height: 50%;
+  height: 70%;
 }
 .username-wrapper {
   height: 20%;
@@ -40,17 +45,21 @@ div {
   list-style: none;
   display: flex;
   justify-content: center;
+  text-align: left;
   flex-flow: column;
-  columns: 6;
-  width: 66%;
+  // width: 90%;
   height: 100%;
   margin: 0;
-  padding: 0;
+  padding: 0; 
+  white-space: nowrap;
   li {
     display: inline-block;
-    // margin: 0px;
-    padding: 1%;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
+  // li.you::after {
+  //   content: " (you)";
+  // }
 }
 .username-wrapper {
   .username {
@@ -72,7 +81,7 @@ div {
   flex-flow: column;
   // justify-content: center;
   .card-size-select-wrapper {
-    width: 100%;
+    width: 80%;
     height: 70%;
     align-items: center;
     display: flex;
@@ -116,5 +125,5 @@ div {
 .start,
 .cancel {
   height: 66%;
-  width: 50%;
+  width: 80%;
 }

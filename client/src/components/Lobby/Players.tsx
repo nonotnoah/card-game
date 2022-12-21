@@ -18,13 +18,13 @@ export default function Players({ socket, onUsernameSubmit, onCancel }: PlayerPr
     onCancel()
   }
   return (
-    <div className="wrapper">
+    <div className="profile-wrapper">
       <div className="title">Players</div>
       <div className="guy-wrapper">
         <Lobby socket={socket} />
         <img src="" alt="" />
       </div>
-      <div className="username-wrapper">
+      {/* <div className="username-wrapper">
         <input
           onSubmit={() => handleUsernameSubmit('')}
           className="username"
@@ -32,7 +32,7 @@ export default function Players({ socket, onUsernameSubmit, onCancel }: PlayerPr
           placeholder="Enter your name" id="name"
         />
         <button className="submit-button">{'>'}</button>
-      </div>
+      </div> */}
       <div className="menu-button">
         <button onClick={() => handleCancel()} className="cancel">Home</button>
       </div>

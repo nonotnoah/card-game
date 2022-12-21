@@ -1,11 +1,8 @@
 .player-list {
-  li.host::before {
-    content: '👑'
-  }
-  li.guest::before {
-    content: '🟢'
-  }
-  li.you::after {
-    content: ' (you)';
-  }
+  // li.host::after {
+  //   content: ' (host)'
+  // }
+  // li.guest::before {
+  //   content: '🟢'
+  // }
 }

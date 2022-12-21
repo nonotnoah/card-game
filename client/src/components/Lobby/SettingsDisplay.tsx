@@ -4,9 +4,9 @@ interface SettingsDisplayProps {
   size: SizeProps
 }
 interface SizeProps {
-  numberOfSymbols: number
-  sizeName: string
-  sizeDescription: string
+  symbol: number
+  name: string
+  description: string
 }
 
 export default function SettingsDisplay({ size }: SettingsDisplayProps) {
@@ -17,13 +17,13 @@ export default function SettingsDisplay({ size }: SettingsDisplayProps) {
       <div className="symbols-wrapper">
         <div className="card-size-select-wrapper">
           <button disabled={true} className="left">-</button>
-          <span className="symbol-number">{size.numberOfSymbols}</span>
+          <span className="symbol-number">{size.symbol}</span>
           <button disabled={true} className="right">+</button>
         </div>
-        <div className="title-size">{size.sizeName}</div>
+        <div className="title-size">{size.name}</div>
       </div>
       <div className="info-wrapper">
-        <p className="size-info">{size.sizeDescription}</p>
+        <p className="size-info">{size.description}</p>
       </div>
       <div className="menu-button">
         <button disabled={true} className="start">Waiting for host to start...</button>

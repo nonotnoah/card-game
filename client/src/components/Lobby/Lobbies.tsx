@@ -13,9 +13,14 @@ interface MySocket extends Socket {
 export default function Lobbies() {
   const [isHost, setIsHost] = useState(false)
   const [isGuest, setIsJoin] = useState(false)
+  const [needPlayers, setNeedPlayers] = useState(false)
+  const [lobbyFound, setLobbyFound] = useState(false)
   const gameID = useRef('')
 
   const socket = useRef<MySocket>(io(URL, { autoConnect: false }))
+  if (!isHost && !isGuest) { // refresh socket on rerender
+    socket.current = io(URL, { autoConnect: false })
+  }
 
   useEffect(() => {
     // connect error
@@ -25,6 +30,7 @@ export default function Lobbies() {
 
     // save session
     socket.current.on("session", ({ sessionID, userID }) => {
+      console.log('setting userID:', userID)
       socket.current.auth = { sessionID };
       socket.current.userID = userID
       // store in sessionStorage. this should implement localStorage in live build
@@ -35,14 +41,28 @@ export default function Lobbies() {
 
     // open host options if socket becomes host
     socket.current.on('newHost', (userID: string) => {
+      console.log('Host left lobby. New host is:', userID)
+      // for some reason this only triggers when host socket forces disconnect
+      // (like by closing the tab)
       if (socket.current.userID == userID) {
         setIsHost(true)
         setIsJoin(false)
+        setNeedPlayers(true)
       }
     })
 
+    // socket.current.on('start', () => {
+    //   sessionStorage.setItem('gameStarted', 'true')
+    // })
+
     socket.current.on('lobbyNotFound', () => {
-      // TODO: implement
+      setIsHost(false)
+      setIsJoin(false)
+      setLobbyFound(false)
+    })
+
+    socket.current.on('lobbyFound', () => {
+      setLobbyFound(true)
     })
 
     return (): void => {
@@ -50,10 +70,19 @@ export default function Lobbies() {
     };
   }, [socket.current]);
 
-  const logIn = (gameID: string, isHost: boolean) => {
+  useEffect(() => {
+    socket.current.emit('needPlayers') // delay this until next render
+  }, [needPlayers])
+
+  const logIn = (gameID: string, isHost: boolean, sessionID?: string) => {
     const username = getRandomUsername()
-    socket.current.auth = { username, gameID, isHost }
+    socket.current.auth = { sessionID, username, gameID, isHost }
     socket.current.connect()
+  }
+
+  const sessionID = sessionStorage.getItem('sessionID')
+  if (sessionID) {
+    logIn(gameID.current, false, sessionID)
   }
 
   const createRoom = () => {
@@ -71,12 +100,23 @@ export default function Lobbies() {
     logIn(gameID.current, false)
   }
 
+  const handleCancel = () => {
+    setIsHost(false)
+    setIsJoin(false)
+  }
+
   return (
     <div className="wrapper">
       {isHost ? (
-        <HostLobbyRoom socket={socket.current} gameID={gameID.current}></HostLobbyRoom>
-      ) : isGuest ? (
-        <JoinLobbyRoom socket={socket.current} gameID={gameID.current}></JoinLobbyRoom>
+        <HostLobbyRoom
+          socket={socket.current}
+          onCancel={() => handleCancel()}>
+        </HostLobbyRoom>
+      ) : isGuest && lobbyFound ? (
+        <JoinLobbyRoom
+          socket={socket.current}
+          onCancel={() => handleCancel()}>
+        </JoinLobbyRoom>
       ) : (
         <div className="wrapper">
           <button

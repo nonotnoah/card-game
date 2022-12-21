@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react"
+// TODO: make connectedPlayers a callable API that returns promises
+import { useEffect, useRef, useState } from "react"
 import { Socket } from "socket.io-client"
 import '../../styles/Lobby.scss'
 import animalEmojis from "../../utils/animalEmojis"
@@ -21,35 +22,46 @@ interface PlayerPacket {
 }
 export default function Lobby({ socket }: SocketProps) {
   const [connectedPlayers, setConnectedPlayers] = useState({} as PlayerPacket)
-  const players = Object.values(connectedPlayers)
-  console.log(connectedPlayers)
-
+  const playerList = useRef(Object.values(connectedPlayers))
+  // console.log(playerList)
+  // console.log(connectedPlayers)
   useEffect(() => {
     // update connectedPlayers list
     socket.on('updatePlayers', (players) => {
       // console.log(Object.values(players))
       setConnectedPlayers(players)
+      playerList.current = Object.values(players)
     })
 
     return (): void => {
       socket.removeListener('updatePlayers')
     }
   }, [socket])
-  console.log(socket)
+  if (playerList.current.length == 0) {
+     socket.emit('needPlayers')
+  }
+
+  let emoji
+  const getEmoji = (username: string) => {
+    emoji = animalEmojis[username]
+    return emoji
+  }
 
   return (
     <ul className="player-list">
-      {players.map((player) => {
-        return (
-          <li
-            className={`
+      {playerList.current.length > 0 &&
+        playerList.current.map((player) => {
+          // console.log(player.userID, socket.userID)
+          return (
+            <li key={player.userID} id={player.userID}
+              className={`
             ${player.isHost ? 'host' : 'guest'}
             ${player.userID == socket.userID ? 'you' : ''} 
             `}>
-            {emoji}{player.username}
-          </li>
-        )
-      })}
+              {`${getEmoji(player.username)} ${player.username} ${player.userID == socket.userID ? '(you)' : ''} ${player.isHost ? '(👑)' : ''}`}
+            </li>
+          )
+        })}
     </ul>
   )
 }
