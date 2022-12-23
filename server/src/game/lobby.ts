@@ -2,6 +2,10 @@ import { Server, Socket } from "socket.io";
 import ServerSessionStore from "../sessionStore";
 import { Deck } from "../utils/deck";
 import { BasicGame } from "./modes/basicGame";
+import TowerGame from "./modes/towerGame";
+import WellGame from "./modes/wellGame";
+import HotPotatoGame from "./modes/hotPotatoGame";
+import BadAppleGame from "./modes/badAppleGame";
 
 interface MySocket extends Socket {
   [key: string]: any
@@ -61,16 +65,16 @@ export default class Lobby {
           this.currentGame = new BasicGame(args)
           break
         case 'tower':
-          // impl tower
+          this.currentGame = new TowerGame(args)
           break
         case 'well':
-          // impl well
+          this.currentGame = new WellGame(args)
           break
         case 'hotPotato':
-          // impl hotPotato
+          this.currentGame = new HotPotatoGame(args)
           break
         case 'badApple':
-          // impl badApple
+          this.currentGame = new BadAppleGame(args)
           break
       }
       this.gameStarted = true
