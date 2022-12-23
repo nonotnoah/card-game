@@ -1,33 +1,49 @@
-import { Server } from "socket.io"
+import { Socket, Server } from "socket.io"
 import { Deck } from "../../utils/deck"
 import { BasicGame } from "./basicGame"
+
 interface MySocket extends Socket {
   [key: string]: any
 }
 interface Players {
   [key: string]: MySocket
 }
-interface GameArgs {
-  io: Server
-  players: Players
-  gameID: string
-  Deck: Deck
+interface GameState {
+  cards: string[][]
+  cardsRemaining: number
+  connectedPlayers: string[]
+  scores: {
+    [userID: string]: number
+  }
 }
+
 export default class TowerGame extends BasicGame {
-  constructor({ io, players, gameID, Deck }: GameArgs) {
-    super({ io, players, gameID, Deck })
+  constructor(io: Server, players: Players, gameID: string, Deck: Deck) {
+    super(io, players, gameID, Deck)
   }
-}
 
+  // Gamestate -------------------------------------
 
-class test {
-  constructor(arg: any) {
+  // nextTurn() {
+    // this.gameState.cards.card1 = this.deck.drawCard()
+    //   this.cards.card2 = this.deck.drawCard()
+    //   if (Array.isArray(this.cards.card1) && Array.isArray(this.cards.card2)) {
+    //     this.cards.match = this.deck.compareCards(this.cards.card1, this.cards.card2)
+    //     this.emitToRoom('draw', { ...this.cards })
+    //     // console.log('sending cards...')
+    //   } else {
+    //     this.cards.match = ''
+    //   }
+    // }
+
+    // playGame() {
+    //   this.emitToRoom('start')
+    //   this.nextTurn()
+    // }
+
+    // endGame() {
+    // }
+
+    // Gamestate -------------------------------------
 
   }
-}
-
-class newtest extends test {
-  constructor(arg: any, arg2: any) {
-    super(arg) 
-  }
-}

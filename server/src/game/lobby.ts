@@ -1,7 +1,7 @@
 import { Server, Socket } from "socket.io";
 import ServerSessionStore from "../sessionStore";
 import { Deck } from "../utils/deck";
-import { BasicGame } from "./modes/basicGame";
+import { BasicGame } from "./modes/_Game";
 import TowerGame from "./modes/towerGame";
 import WellGame from "./modes/wellGame";
 import HotPotatoGame from "./modes/hotPotatoGame";
@@ -68,13 +68,13 @@ export default class Lobby {
           this.currentGame = new TowerGame(args)
           break
         case 'well':
-          this.currentGame = new WellGame(args)
+          // this.currentGame = new WellGame(args)
           break
         case 'hotPotato':
-          this.currentGame = new HotPotatoGame(args)
+          // this.currentGame = new HotPotatoGame(args)
           break
         case 'badApple':
-          this.currentGame = new BadAppleGame(args)
+          // this.currentGame = new BadAppleGame(args)
           break
       }
       this.gameStarted = true

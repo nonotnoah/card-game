@@ -11,6 +11,7 @@ class Deck {
   nValue: number // number of symbols on a card is nValue+1
   cards: string[][]
   cardsCopy: string[][]
+  length
 
   constructor(n: number, imgs: string[] = emojis) {
     this.rangeArray = this.range(n)
@@ -18,6 +19,7 @@ class Deck {
     this.cards = this.makeDeck(n, imgs)
     // make a deep copy of the deck
     this.cardsCopy = [...this.cards]
+    this.length = this.cardsCopy.length
     // this.test()
   }
 
