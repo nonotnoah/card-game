@@ -7,11 +7,10 @@ interface Card {
 }
 
 class Deck {
-  rangeArray: SpecialArray = []
-  nValue: number // number of symbols on a card is nValue+1
-  cards: string[][]
+  private rangeArray: SpecialArray = []
+  private nValue: number // number of symbols on a card is nValue+1
+  private cards: string[][]
   cardsCopy: string[][]
-  length
 
   constructor(n: number, imgs: string[] = emojis) {
     this.rangeArray = this.range(n)
@@ -19,11 +18,14 @@ class Deck {
     this.cards = this.makeDeck(n, imgs)
     // make a deep copy of the deck
     this.cardsCopy = [...this.cards]
-    this.length = this.cardsCopy.length
     // this.test()
   }
 
-  range(n: number = this.nValue) {
+  public length() {
+    return this.cardsCopy.length
+  }
+
+  private range(n: number = this.nValue) {
     const arr: SpecialArray = []
     for (let i = 0; i < n; i++) {
       arr.push(i)
@@ -31,7 +33,7 @@ class Deck {
     return arr
   }
 
-  test(n: number = this.nValue) {
+  private test(n: number = this.nValue) {
     console.log(this.cardsCopy)
     console.log('ordinarypoints:', this.ordinaryPoints(n))
     console.log('pointsatinfinity:', this.pointsAtInfinity(n))
@@ -39,19 +41,19 @@ class Deck {
     console.log('alllines:', this.allLines(n))
   }
 
-  ordinaryPoints(n: number = this.nValue) {
+  private ordinaryPoints(n: number = this.nValue) {
     const arr: SpecialArray = []
     this.rangeArray.map(x => this.rangeArray.map(y => arr.push([x, y])))
     return arr
   }
 
-  pointsAtInfinity(n: number = this.nValue) {
+  private pointsAtInfinity(n: number = this.nValue) {
     const pts = [...this.rangeArray]
     pts.push('inf')
     return pts
   }
 
-  allPoints(n: number = this.nValue) {
+  private allPoints(n: number = this.nValue) {
     const ordPts = this.ordinaryPoints(n)
     const ptsAtInf = this.pointsAtInfinity(n)
     for (const element of ptsAtInf) {
@@ -60,25 +62,25 @@ class Deck {
     return ordPts
   }
 
-  ordinaryLine(m: number, b: number, n: number = this.nValue) {
+  private ordinaryLine(m: number, b: number, n: number = this.nValue) {
     const line: number[][] = []
     this.rangeArray.map(x => line.push([x, (m * x + b) % n]))
     line.push([m])
     return line
   }
 
-  verticalLine(x: number, n: number = this.nValue) {
+  private verticalLine(x: number, n: number = this.nValue) {
     const line: (number[] | string)[] = []
     this.rangeArray.map(y => line.push([x, y]))
     line.push('inf')
     return line
   }
 
-  lineAtInfinity(n: number = this.nValue) {
+  private lineAtInfinity(n: number = this.nValue) {
     return this.pointsAtInfinity(n)
   }
 
-  allLines(n: number = this.nValue) {
+  private allLines(n: number = this.nValue) {
     const lines: any[][] = []
     this.rangeArray.map(m => this.rangeArray.map(b => lines.push(this.ordinaryLine(m, b, n))))
     this.rangeArray.map(x => lines.push(this.verticalLine(x, n)))
@@ -86,7 +88,7 @@ class Deck {
     return lines
   }
 
-  makeDeck(n: number = this.nValue, imgs: string[]) {
+  private makeDeck(n: number = this.nValue, imgs: string[]) {
     const points = this.allPoints(n)
 
     const mapping: any = {}
@@ -116,15 +118,16 @@ class Deck {
     return lines
   }
 
-  drawCard() {
+  public drawCard(state: string) {
     if (this.cardsCopy.length < 2) {
       return null
     }
     const card = this.cardsCopy.shift()
-    return card
+    const cardObj = {state: state, card: card}
+    return cardObj
   }
 
-  compareCards(card1: Card['card'], card2: Card['card']) {
+  public compareCards(card1: Card['card'], card2: Card['card']) {
     for (let symbol1 of card1) {
       for (let symbol2 of card2) {
         if (symbol1 == symbol2) {

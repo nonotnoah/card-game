@@ -27,7 +27,9 @@ class BasicGame {
   players
   deck
   gameID
+  sockets: MySocket[]
   gameState: GameState
+  currentRules: string[]
   rules
   constructor(io: Server, players: Players, gameID: string, Deck: Deck) {
     this.io = io
@@ -35,14 +37,16 @@ class BasicGame {
     this.gameID = gameID
     this.deck = Deck
 
+    this.sockets = Object.values(this.players)
     this.rules = this.initRules()
+    this.currentRules = []
     this.gameState = { // init with default values
-      cards: [['']],
-      cardsRemaining: this.deck.length,
+      cards: this.deck.cardsCopy,
+      cardsRemaining: this.deck.length(),
       connectedPlayers: Object.keys(this.players),
       scores: { ['userID']: 0 }
     }
-    
+
     // add default listeners to all
     this.addListenersToAll(this.rules)
   }
@@ -92,12 +96,14 @@ class BasicGame {
             func(res, socket)
           })
         })
+        this.currentRules.push(func.name)
       })
     } else {
       Object.values(this.players).map(socket => {
         socket.on(listeners.name, (res: any) => {
           listeners(res, socket)
         })
+        this.currentRules.push(listeners.name)
       })
     }
     console.log('Added listeners:', listeners, 'to', this.gameID)
@@ -132,19 +138,22 @@ class BasicGame {
         Object.values(this.players).map(socket => {
           socket.removeListener(func.name, () => func())
         })
+        const idx = this.currentRules.indexOf(func.name)
+        delete this.currentRules[idx]
       })
     } else {
       Object.values(this.players).map(socket => {
         socket.removeListener(listeners.name, () => listeners())
       })
+      const idx = this.currentRules.indexOf(listeners.name)
+      delete this.currentRules[idx]
     }
     console.log('Removed', listeners, 'from room:', this.gameID)
   }
 
   /** 
   * @description *Reconnects with local game's custom event listeners.*
-  * @emits 
-  * emit reconnect
+  * @emits 'reconnect'
   * 
   * update {this.players} with current socket
   * 
@@ -157,6 +166,18 @@ class BasicGame {
     this.players[socket.userID] = socket // update with fresh socket
     this.removeListenerFromAll(this.rules) // remove listeners
     this.addListenersToAll(this.rules) // add listeners
+  }
+
+  /** 
+  * @description *Disconnects socket and triggers continue vote*
+  * @emits 'playerLeave'
+  * 
+  * removes socket from {this.players} 
+  */
+  disconnect(socket: MySocket) {
+    socket.emit('playerLeave') 
+    // TODO: have this trigger a "vote to continue without player" modal
+    delete this.players[socket.userID]
   }
 
   // tools -----------------------------------------
@@ -175,6 +196,8 @@ class BasicGame {
   //     }
   //   }
   // }
+
+  // Rules/Listeners -------------------------------
 
   // Gamestate -------------------------------------
 

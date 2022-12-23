@@ -2,10 +2,7 @@ import { Server, Socket } from "socket.io";
 import ServerSessionStore from "../sessionStore";
 import { Deck } from "../utils/deck";
 import { BasicGame } from "./modes/_Game";
-import TowerGame from "./modes/towerGame";
-import WellGame from "./modes/wellGame";
-import HotPotatoGame from "./modes/hotPotatoGame";
-import BadAppleGame from "./modes/badAppleGame";
+import { BadAppleGame, HotPotatoGame, WellGame, TowerGame } from './modes/gameModes'
 
 interface MySocket extends Socket {
   [key: string]: any
@@ -26,14 +23,13 @@ interface PlayerPacket {
   }
 }
 
-
 export default class Lobby {
   gameID
   io
   connectedPlayers
   serverStorage
   gameStarted
-  currentGame: BasicGame
+  currentGame?: (TowerGame | WellGame | HotPotatoGame | BadAppleGame)
   currentSize
   constructor(gameID: string, io: Server, serverStorage: ServerSessionStore) {
     this.gameID = gameID
@@ -41,7 +37,7 @@ export default class Lobby {
     this.connectedPlayers = {} as Players
     this.serverStorage = serverStorage
     this.gameStarted = false
-    this.currentGame = {} as BasicGame // this might not work
+    // this.currentGame = {} // this might not work
     this.currentSize = { symbol: 8, name: 'Normal', description: 'The standard experience' }
   }
 
@@ -53,36 +49,25 @@ export default class Lobby {
     console.log('room players', players)
     if (socket.isHost && players.length > 1) {
       const deck = new Deck(symbol)
-      const args = {
-        io: this.io,
-        players: this.connectedPlayers,
-        gameID: this.gameID,
-        Deck: deck
-      }
       console.log('creating new game')
       switch (gameMode) {
-        case 'basicGame':
-          this.currentGame = new BasicGame(args)
-          break
         case 'tower':
-          this.currentGame = new TowerGame(args)
+          this.currentGame = new TowerGame(this.io, this.connectedPlayers, this.gameID, deck)
           break
         case 'well':
-          // this.currentGame = new WellGame(args)
+          // this.currentGame = new WellGame(this.io, this.connectedPlayers, this.gameID, deck)
           break
         case 'hotPotato':
-          // this.currentGame = new HotPotatoGame(args)
+          // this.currentGame = new HotPotatoGame(this.io, this.connectedPlayers, this.gameID, deck)
           break
         case 'badApple':
-          // this.currentGame = new BadAppleGame(args)
+          // this.currentGame = new BadAppleGame(this.io, this.connectedPlayers, this.gameID, deck)
           break
       }
       this.gameStarted = true
       socket.broadcast.to(this.gameID).emit('start') // JoinLobbyRoom picks this up
     }
-    // TODO: create deck then pass deck to gamemode file
   }
-
 
   killLobby() {
 
@@ -111,14 +96,8 @@ export default class Lobby {
     // this.emitToRoom('updatePlayers', players)
   }
 
-
-  // async disconnect(socket: MySocket) {
-  // for some reason this isn't triggering on tab close
   disconnect = (socket: MySocket) => {
     console.log('lobby.ts disconnect')
-    // const matchingSockets = await this.io.in(socket.gameID).fetchSockets();
-    // const isDisconnected = matchingSockets.length === 0;
-    // if (isDisconnected) {
     // notify other users
     socket.broadcast.emit("user disconnected", socket.userID);
     // update the connection status of the session
@@ -129,10 +108,14 @@ export default class Lobby {
       isHost: socket.isHost,
       connected: false,
     });
-    // if game started, find new host but keep session data in server store
+
+    // if game started, dc socket from game 
+    // and find new host but keep session 
+    // data in server store for potential rc
     const players = Object.values(this.connectedPlayers)
-    if (this.gameStarted && socket.isHost) {
-      this.leaveLobby(socket)
+    if (this.gameStarted && socket.isHost && this.currentGame) {
+      this.currentGame.disconnect(socket) // dc from game
+      this.leaveLobby(socket) // dc from lobby
       if (players.length > 0)
         this.newHost()
     } else if (!this.gameStarted) {
@@ -184,8 +167,6 @@ export default class Lobby {
 
     // add lobby listeners
     this.addListenerTo(socket, 'start', this.start)
-    // not needed because 'disconnect' is called anyway
-    // this.addListenerTo(socket, 'cancel', this.cancel) 
     this.addListenerTo(socket, 'disconnect', this.disconnect)
     this.addListenerTo(socket, 'end', this.endGame)
     this.addListenerTo(socket, 'sizeChange', this.sizeChange)
