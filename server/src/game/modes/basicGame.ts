@@ -1,10 +1,10 @@
 import { Server, Socket } from 'socket.io'
-import { Deck } from '../utils/deck'
-import { animals } from '../utils/animals'
+import { Deck } from '../../utils/deck'
+import { animals } from '../../utils/animals'
 import { v4 as uuidv4 } from 'uuid'
-import ServerSessionStore from '../sessionStore'
+import ServerSessionStore from '../../sessionStore'
 import { connect } from 'http2'
-import Lobby from './lobby'
+import Lobby from '../lobby'
 
 interface MySocket extends Socket {
   [key: string]: any
@@ -17,21 +17,30 @@ interface DrawPayload {
   card2: (string[] | null | undefined),
   match: string
 }
+interface GameArgs {
+  io: Server
+  players: Players
+  gameID: string
+  Deck: Deck
+}
 
-class Game {
+class BasicGame {
   io
   players
   deck
   gameID
   // serverStorage
   cards
-  constructor(io: Server, players: Players, gameID: string) {
+  constructor({ io, players, gameID, Deck }: GameArgs) {
     this.io = io
 
     this.players = players
     this.gameID = gameID
-    // dobble numbers: 3, 7, 13, 21
-    this.deck = new Deck(6, animals)
+
+    // this.symbols = symbols
+
+    // this.deck = new Deck(symbols, animals)
+    this.deck = Deck
     this.cards = {} as DrawPayload
     this.playGame()
   }
@@ -97,7 +106,7 @@ class Game {
   }
 
   playGame() {
-    this.emitToRoom('start') 
+    this.emitToRoom('start')
     this.nextTurn()
 
     this.addListenerToAll('correct', (guess: string, socket: MySocket) => {
@@ -110,4 +119,4 @@ class Game {
   }
 }
 
-export { Game }
+export { BasicGame }

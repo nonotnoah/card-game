@@ -1,6 +1,7 @@
 import { Server, Socket } from "socket.io";
 import ServerSessionStore from "../sessionStore";
-import { Game } from "./game";
+import { Deck } from "../utils/deck";
+import { BasicGame } from "./modes/basicGame";
 
 interface MySocket extends Socket {
   [key: string]: any
@@ -28,7 +29,7 @@ export default class Lobby {
   connectedPlayers
   serverStorage
   gameStarted
-  Game: Game
+  currentGame: BasicGame
   currentSize
   constructor(gameID: string, io: Server, serverStorage: ServerSessionStore) {
     this.gameID = gameID
@@ -36,26 +37,48 @@ export default class Lobby {
     this.connectedPlayers = {} as Players
     this.serverStorage = serverStorage
     this.gameStarted = false
-    this.Game = {} as Game // this might not work
-    this.currentSize = {symbol: 8, name: 'Normal', description: 'The standard experience'}
+    this.currentGame = {} as BasicGame // this might not work
+    this.currentSize = { symbol: 8, name: 'Normal', description: 'The standard experience' }
   }
 
   // rules
-  start(socket: MySocket) {
+  start(socket: MySocket, gameMode: string) {
     // wait for host to start game
-    let keys = Object.keys(this.connectedPlayers)
-    console.log('room players', keys)
-    if (socket.isHost && keys.length > 1) {
-      socket.broadcast.to(this.gameID).emit('start') // JoinLobbyRoom picks this up
-      this.Game = new Game(
-        this.io,
-        this.connectedPlayers,
-        this.gameID
-      )
+    const symbol = this.currentSize.symbol
+    let players = Object.keys(this.connectedPlayers)
+    console.log('room players', players)
+    if (socket.isHost && players.length > 1) {
+      const deck = new Deck(symbol)
+      const args = {
+        io: this.io,
+        players: this.connectedPlayers,
+        gameID: this.gameID,
+        Deck: deck
+      }
       console.log('creating new game')
+      switch (gameMode) {
+        case 'basicGame':
+          this.currentGame = new BasicGame(args)
+          break
+        case 'tower':
+          // impl tower
+          break
+        case 'well':
+          // impl well
+          break
+        case 'hotPotato':
+          // impl hotPotato
+          break
+        case 'badApple':
+          // impl badApple
+          break
+      }
+      this.gameStarted = true
+      socket.broadcast.to(this.gameID).emit('start') // JoinLobbyRoom picks this up
     }
-    this.gameStarted = true
+    // TODO: create deck then pass deck to gamemode file
   }
+
 
   killLobby() {
 
@@ -167,7 +190,7 @@ export default class Lobby {
 
     // join socket to room
     socket.join(socket.gameID)
-    
+
     // send session details to newly connected socket
     socket.emit('session', {
       sessionID: socket.sessionID,

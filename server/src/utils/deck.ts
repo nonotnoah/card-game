@@ -1,3 +1,4 @@
+import emojis from "./emojis"
 // why doesn't this work
 // type SpecialArray = (number | number[] | string)[]
 type SpecialArray = any[]
@@ -11,7 +12,7 @@ class Deck {
   cards: string[][]
   cardsCopy: string[][]
 
-  constructor(n: number, imgs: string[]) {
+  constructor(n: number, imgs: string[] = emojis) {
     this.rangeArray = this.range(n)
     this.nValue = n
     this.cards = this.makeDeck(n, imgs)

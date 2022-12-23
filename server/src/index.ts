@@ -3,7 +3,6 @@ import express from 'express'
 import http from 'http'
 import { Server, Socket } from 'socket.io'
 
-import { Game } from './game/game'
 import Lobby from './game/lobby'
 import randomID from './utils/randomID'
 
@@ -79,7 +78,7 @@ io.on('connection', (socket: MySocket) => {
     currentLobbies[socket.gameID].joinLobby(socket)
     // reconnect if applicable
     if (currentLobbies[socket.gameID].gameStarted) {
-      currentLobbies[socket.gameID].Game.reconnect(socket)
+      currentLobbies[socket.gameID].currentGame.reconnect(socket)
     }
   }
 
