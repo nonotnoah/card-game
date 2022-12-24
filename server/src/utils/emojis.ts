@@ -1,3 +1,4 @@
+// TODO: choose funnier emojis wtf
 const emojis = [
   '🐵',
   '🦍',

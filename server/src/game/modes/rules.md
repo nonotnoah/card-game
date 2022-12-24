@@ -3,6 +3,7 @@ tower
 - 1 card in middle of table
 - when ready, each player flips card
 - whoever matches first puts the card on top of their current one, thus drawing a new card
+  - the succesful matcher should have a delay created by the animation of pulling the card from center to theirs. artificial delay is ok too
 - the game continues until all cards are drawn, and the winner is the person with the most cards
 
 well

@@ -118,13 +118,25 @@ class Deck {
     return lines
   }
 
+  /** @returns cardObj.symbols as undefined if there are no cards left to draw
+   */
   public drawCard(state: string) {
-    if (this.cardsCopy.length < 2) {
-      return null
-    }
     const card = this.cardsCopy.shift()
-    const cardObj = {state: state, card: card}
+    const cardObj = { state: state, symbols: card }
     return cardObj
+  }
+
+  /** @returns guess if match, false if not
+   */
+  public checkGuess(guess: string, card: { state: string, symbols: string[] | undefined }) {
+    if (card.symbols) {
+      for (let emoji of card.symbols) {
+        if (guess == emoji) {
+          return guess
+        }
+      }
+    }
+    return false
   }
 
   public compareCards(card1: Card['card'], card2: Card['card']) {

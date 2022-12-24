@@ -5,20 +5,29 @@ interface MySocket extends Socket {
   [key: string]: any
 }
 interface Players {
-  [key: string]: MySocket
+  [userID: string]: MySocket
 }
 interface FunctionList {
-  funcs: Array<(res: any, socket: MySocket) => void>
+  // funcs: Array<(res: any, socket: MySocket) => void>
+  funcs: ((res: any, socket: MySocket) => void)[]
 }
 function instanceOfFunctionList(object: any): object is FunctionList {
   return 'member' in object
 }
 interface GameState {
-  cards: string[][]
   cardsRemaining: number
-  connectedPlayers: string[]
-  scores: {
-    [userID: string]: number
+  middleCard: {
+    state: string
+    symbols: string[] | undefined
+  }
+  connectedPlayers: {
+    [userID: string]: {
+      score: number
+      card: {
+        state: string
+        symbols: string[] | undefined // TOOD: add undef handle in clientgame
+      }
+    }
   }
 }
 
@@ -30,7 +39,7 @@ class BasicGame {
   sockets: MySocket[]
   gameState: GameState
   currentRules: string[]
-  rules
+  rules: FunctionList
   constructor(io: Server, players: Players, gameID: string, Deck: Deck) {
     this.io = io
     this.players = players
@@ -41,14 +50,21 @@ class BasicGame {
     this.rules = this.initRules()
     this.currentRules = []
     this.gameState = { // init with default values
-      cards: this.deck.cardsCopy,
       cardsRemaining: this.deck.length(),
-      connectedPlayers: Object.keys(this.players),
-      scores: { ['userID']: 0 }
+      middleCard: { state: 'faceUp', symbols: [] },
+      connectedPlayers: {}
     }
 
+    // map player info to gamestate
+    Object.keys(this.players).map(userID => {
+      this.gameState.connectedPlayers[userID] = {
+        score: 0,
+        card: { state: 'faceDown', symbols: [] }
+      }
+    })
+
     // add default listeners to all
-    this.addListenersToAll(this.rules)
+    // this.addListenersToAll(this.rules)
   }
 
   // tools -----------------------------------------
@@ -56,7 +72,16 @@ class BasicGame {
   /** @description Override this function in non-generic game class
    * to return list of game event listeners!
   */
-  initRules() { return Array<(res: any, socket: MySocket) => void> }
+  initRules() {
+    let functions: FunctionList
+    functions = {
+      funcs: [
+        this.initializer
+      ]
+    }
+    return functions
+    // return Array<(res: any, socket: MySocket) => void> 
+  }
 
   /** 
    * @emits emits to current {this.gameID} room
@@ -170,12 +195,12 @@ class BasicGame {
 
   /** 
   * @description *Disconnects socket and triggers continue vote*
-  * @emits 'playerLeave'
+  * @emitsToRoom 'playerLeave'
   * 
   * removes socket from {this.players} 
   */
   disconnect(socket: MySocket) {
-    socket.emit('playerLeave') 
+    this.emitToRoom('playerLeave', this.gameState)
     // TODO: have this trigger a "vote to continue without player" modal
     delete this.players[socket.userID]
   }
@@ -185,6 +210,9 @@ class BasicGame {
   // TEMPLATE
 
   // Rules/Listeners -------------------------------
+
+  // this is for init value of this.currentRules
+  private initializer(res: any, socket: MySocket) { }
 
   // correct(guess: string, socket: MySocket) {
   //   if (guess === this.cards.match) {
