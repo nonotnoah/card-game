@@ -1,0 +1,4 @@
+on correct:
+guessed emoji in center and personal matched emoji highlights low opacity yellow/orange.
+
+center card quickly becomes more opaque while shrinking to coin size, revealing the card underneath, then is shot off like a puck to the correct guesser 
