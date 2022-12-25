@@ -7,8 +7,9 @@ import CardProps from './Cards'
 import { shuffleArray } from '../utils/shuffle';
 import HostLobbyRoom from './Lobby/HostLobbyRoom';
 import { io } from 'socket.io-client';
+import TowerGame from './Game/TowerGame';
 
-function Dev() {
+function _Dev() {
   const socket = io('http://localhost:5000', {autoConnect: false})
   const auth = React.useRef({ username: 'test', gameID: '12345', isHost: true })
   socket.auth = auth.current
@@ -58,6 +59,12 @@ function Dev() {
       <button onClick={() => asGuest()}>Guest</button>
     </>
 
+  )
+}
+
+function Dev() {
+  return (
+    <TowerGame></TowerGame>
   )
 }
 

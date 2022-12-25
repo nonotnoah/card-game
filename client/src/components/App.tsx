@@ -3,6 +3,7 @@ import '../styles/App.css'
 import { io, Socket } from 'socket.io-client'
 import ClientGame from './ClientGame'
 import Lobbies from './Lobby/Lobbies'
+import TowerGame from './Game/TowerGame'
 
 const URL: string = 'http://localhost:5000'
 
@@ -22,7 +23,8 @@ function App() {
       {loggedIn ? (
         <ClientGame socket={socket.current}></ClientGame>
       ) : (
-        <Lobbies />
+        // <Lobbies />
+        <TowerGame></TowerGame>
       )}
     </div>
   )

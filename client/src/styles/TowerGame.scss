@@ -1,0 +1,147 @@
+div {
+  // border: 1px solid gray;
+}
+// body {
+//   display: flex;
+//   width: 100vw;
+// }
+.game-wrapper {
+  // position: absolute;
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  user-select: none;
+}
+.mid-card-wrapper {
+  z-index: 10;
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  transform: translate(-50%, -50%);
+  top: 35%;
+  left: 50%;
+  margin: 0 auto;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+@keyframes rotate-card {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(-360deg);
+  }
+}
+.mid-card {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  // transform: rotate(90deg);
+  animation-name: rotate-card;
+  animation-iteration-count: infinite;
+  animation-duration: 20s;
+  animation-play-state: running; // paused for freeze
+  animation-timing-function: linear;
+  // transition: 1s;
+
+  div {
+    text-align: end;
+    position: absolute;
+    width: 50%;
+    right: 0;
+    font-size: 3rem;
+    height: auto;
+    transform-origin: left;
+  }
+  @keyframes embiggen {
+    from {
+      font-size: 3rem;
+    }
+    to {
+      font-size: 4rem;
+    }
+  }
+  .symbol-wrapper span {
+    transition: .1s;
+  }
+  .symbol-wrapper span:hover {
+    font-size: 4rem;
+    transition: .1s;
+    transition-timing-function: ease-out;
+    cursor: pointer ;
+  }
+}
+@for $i from 1 through 8 {
+  .mid-card div:nth-child(#{$i}) {
+    transform: rotate(calc(#{$i} * 45deg));
+  }
+}
+
+.my-emoji-wrapper {
+  position: absolute;
+  left: 50%;
+  top: 75%;
+  margin: 0 auto;
+  transform: translate(-50%, -50%);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.my-emojis {
+  font-size: 3rem;
+}
+
+.six-player-wrapper {
+  position: absolute;
+  width: 900px;
+  height: 300px;
+  transform: translate(-50%, -50%);
+  top: 35%;
+  left: 50%;
+  margin: 0 auto;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.player-wrapper-left,
+.player-wrapper-right {
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  transform: translate(-125%, 0%);
+  margin: 0 auto;
+
+  display: flex;
+  flex-flow: column;
+  justify-content: center;
+  align-items: center;
+}
+.player-wrapper-right {
+  transform: translate(125%, 0%);
+}
+.player-wrapper {
+  padding: 10%;
+}
+
+@keyframes flash-gold {
+  from {
+    background-color: rgba(255, 166, 0, 0.849);
+  }
+  to {
+    background-color: rgba(255, 166, 0, 0);
+  }
+}
+// #test {
+//   border-radius: 25%;
+//   animation-name: flash-gold;
+//   animation-duration: 1s;
+// }
