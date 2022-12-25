@@ -10,7 +10,7 @@ interface PlayerProps {
   onCancel: () => void
 }
 
-export default function Players({ socket, onUsernameSubmit, onCancel }: PlayerProps) {
+export default function PlayersColumn({ socket, onUsernameSubmit, onCancel }: PlayerProps) {
   const handleUsernameSubmit = (username: string) => {
     onUsernameSubmit(username)
   }

@@ -15,7 +15,7 @@ interface SizeProps {
   description: string
 }
 
-export default function Settings({ size, onSizeChange, onStart }: SettingsProps) {
+export default function SettingsColumn({ size, onSizeChange, onStart }: SettingsProps) {
   const numberOfSymbols = useRef(size.symbol)
   const sizeName = useRef(size.name)
   const sizeDescription = useRef(size.description)

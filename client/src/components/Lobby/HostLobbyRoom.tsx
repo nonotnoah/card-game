@@ -5,8 +5,8 @@ import { useState, useRef, useEffect } from "react";
 import ClientGame from "../ClientGame";
 import { Socket } from "socket.io-client";
 import "../../styles/LobbyRoom.scss";
-import Settings from "./Settings";
-import Players from "./Players";
+import SettingsColumn from "./SettingsColumn";
+import PlayersColumn from "./PlayersColumn";
 
 interface MySocket extends Socket {
   [key: string]: any
@@ -66,12 +66,12 @@ export default function HostLobbyRoom({ socket, onCancel }: LobbyProps) {
     <div className="wrapper">
       {waitingForPlayers ? (
         <div className="box">
-          <Players
+          <PlayersColumn
             socket={socket}
             onUsernameSubmit={(username) => handleUsernameSubmit(username)}
             onCancel={() => handleCancel()}
           />
-          <Settings
+          <SettingsColumn
             size={size}
             onSizeChange={(val) => handleSizeChange(val)}
             onStart={() => handleStart()}

@@ -5,7 +5,7 @@ import { io, Socket } from 'socket.io-client'
 import ClientGame from '../ClientGame'
 import SettingsDisplay from './SettingsDisplay'
 import Lobby from './Lobby'
-import Players from './Players'
+import PlayersColumn from './PlayersColumn'
 
 interface MySocket extends Socket {
   [key: string]: any
@@ -63,7 +63,7 @@ export default function JoinLobbyRoom({ socket, onCancel }: LobbyProps) {
     <div className="wrapper">
       {waitingForPlayers ? (
         <div className="box">
-          <Players
+          <PlayersColumn
             socket={socket}
             onUsernameSubmit={(username) => handleUsernameSubmit(username)}
             onCancel={() => handleCancel()}
