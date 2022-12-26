@@ -94,12 +94,15 @@ div {
   display: flex;
   justify-content: center;
   align-items: center;
+  .symbol-wrapper {
+    display: inline;
+  }
 }
 .my-emojis {
   font-size: 3rem;
 }
 
-.six-player-wrapper {
+.player-wrapper-lg {
   position: absolute;
   width: 900px;
   height: 300px;
