@@ -1,5 +1,6 @@
 import { Server, Socket } from 'socket.io'
 import { Deck } from '../../utils/deck'
+import GameState from '../../interfaces/GameState'
 
 interface MySocket extends Socket {
   [key: string]: any
@@ -13,22 +14,6 @@ interface FunctionList {
 }
 function instanceOfFunctionList(object: any): object is FunctionList {
   return 'member' in object
-}
-interface GameState {
-  cardsRemaining: number
-  middleCard: {
-    state: string
-    symbols: string[] | undefined
-  }
-  connectedPlayers: {
-    [userID: string]: {
-      score: number
-      card: {
-        state: string
-        symbols: string[] | undefined // TOOD: add undef handle in clientgame
-      }
-    }
-  }
 }
 
 class BasicGame {
@@ -56,12 +41,14 @@ class BasicGame {
     }
 
     // map player info to gamestate
-    Object.keys(this.players).map(userID => {
+    for (const [userID, MySocket] of Object.entries(this.players)) {
       this.gameState.connectedPlayers[userID] = {
-        score: 0,
+        isHost: MySocket.isHost,
+        username: MySocket.username,
+        score: 1,
         card: { state: 'faceDown', symbols: [] }
       }
-    })
+    }
 
     // add default listeners to all
     // this.addListenersToAll(this.rules)

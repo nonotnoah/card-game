@@ -1,25 +1,13 @@
 import { Socket, Server } from "socket.io"
 import { Deck } from "../../utils/deck"
 import { BasicGame } from "./basicGame"
+import GameState from "../../interfaces/GameState"
 
 interface MySocket extends Socket {
   [key: string]: any,
 }
 interface Players {
   [key: string]: MySocket
-}
-interface GameState {
-  cards: string[][]
-  cardsRemaining: number
-  connectedPlayers: {
-    [userID: string]: {
-      score: number
-      card: {
-        state: string
-        symbols: string[]
-      }
-    }
-  }
 }
 
 export class TowerGame extends BasicGame {
