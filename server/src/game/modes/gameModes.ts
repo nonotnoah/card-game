@@ -51,7 +51,8 @@ export class TowerGame extends BasicGame {
   /**
    * @returns
    */
-  method() { }
+  // method() { }
+
   // tools -----------------------------------------
 
   // Rules/Listeners -------------------------------
