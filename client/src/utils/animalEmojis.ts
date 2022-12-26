@@ -17,6 +17,15 @@ const animalEmojis: Animojis = {
   'Unicorn': '🦄',
   'Zebra': '🦓',
   'Deer': '🦌',
+  'Dasher': '🦌',
+  'Dancer': '🦌',
+  'Prancer': '🦌',
+  'Vixen': '🦌',
+  'Comet': '🦌',
+  'Cupid': '🦌',
+  'Dunder': '🦌',
+  'Blixen': '🦌',
+  'Rudolph': '🦌',
   'Cow': '🐮',
   'Ox': '🐂',
   'Water Buffalo': '🐃',
@@ -102,4 +111,9 @@ const animalEmojis: Animojis = {
   'Squid': '🦑',
 }
 
-export default animalEmojis
+const getEmoji = (username: string) => {
+  let emoji = animalEmojis[username]
+  return emoji
+}
+
+export { animalEmojis, getEmoji }

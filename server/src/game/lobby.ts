@@ -40,14 +40,59 @@ export default class Lobby {
     // this.currentGame = {} // this might not work
     this.currentSize = { symbol: 8, name: 'Normal', description: 'The standard experience' }
   }
+  
+  // Init -------------------------------------
 
-  // rules
-  start(socket: MySocket, gameMode: string) {
+  joinLobby(socket: MySocket) {
+    // add socket to connected player list
+    this.connectedPlayers[socket.userID] = socket
+
+    // add lobby listeners
+    this.addListenerTo(socket, 'start', this.start)
+    this.addListenerTo(socket, 'disconnect', this.disconnect)
+    this.addListenerTo(socket, 'end', this.endGame)
+    this.addListenerTo(socket, 'sizeChange', this.sizeChange)
+    this.addListenerTo(socket, 'needSizeChange', this.needSizeChange)
+    this.addListenerTo(socket, 'needPlayers', this.needPlayers)
+
+    // join socket to room
+    socket.join(socket.gameID)
+
+    // send session details to newly connected socket
+    socket.emit('session', { // listener in Lobbies.tsx
+      username: socket.username,
+      sessionID: socket.sessionID,
+      userID: socket.userID
+    })
+    console.log('emitting session to:', socket.userID)
+
+    // persist session as key, value
+    this.serverStorage.saveSession(socket.sessionID, {
+      userID: socket.userID,
+      username: socket.username,
+      gameID: socket.gameID,
+      isHost: socket.isHost,
+      connected: true
+    })
+    console.log('server saving', socket.username + "'s session as:", socket.userID)
+ 
+    // update playerlist
+    const players = this.getPlayers()
+    console.log('sending', players, 'to players')
+    this.emitToRoom('updatePlayers', players) // listener in Lobby.tsx
+  }
+
+  // Init -------------------------------------
+
+  // Rules ------------------------------------
+
+  start = (socket: MySocket, gameMode: string) => {
     // wait for host to start game
     const symbol = this.currentSize.symbol
     let players = Object.keys(this.connectedPlayers)
-    console.log('room players', players)
-    if (socket.isHost && players.length > 1) {
+    // console.log('room players', players)
+    // console.log(socket.isHost, players.length)
+    if (socket.isHost && players.length > 0) {
       const deck = new Deck(symbol)
       console.log('creating new game')
       switch (gameMode) {
@@ -131,11 +176,12 @@ export default class Lobby {
     // console.log(this.currentSize);
     this.emitToRoom('sizeChange', size)
   }
+
   needSizeChange = (socket: MySocket) => {
     socket.emit('sizeChange', this.currentSize)
   }
 
-  endGame(socket: MySocket) {
+  endGame = (socket: MySocket) => {
     this.gameStarted = false
   }
 
@@ -144,6 +190,10 @@ export default class Lobby {
     console.log('sending', players, 'to', socket.username)
     socket.emit('updatePlayers', players)
   }
+
+  // Rules ------------------------------------
+
+  // Tools ------------------------------------
 
   // add listener to socket
   addListenerTo(socket: MySocket, listener: string, func: Function) {
@@ -159,45 +209,6 @@ export default class Lobby {
   // emit event to room
   emitToRoom(event: string, ...args: any[]) {
     this.io.in(this.gameID).emit(event, ...args)
-  }
-
-  joinLobby(socket: MySocket) {
-    // add socket to connected player list
-    this.connectedPlayers[socket.userID] = socket
-
-    // add lobby listeners
-    this.addListenerTo(socket, 'start', this.start)
-    this.addListenerTo(socket, 'disconnect', this.disconnect)
-    this.addListenerTo(socket, 'end', this.endGame)
-    this.addListenerTo(socket, 'sizeChange', this.sizeChange)
-    this.addListenerTo(socket, 'needSizeChange', this.needSizeChange)
-    this.addListenerTo(socket, 'needPlayers', this.needPlayers)
-
-    // join socket to room
-    socket.join(socket.gameID)
-
-    // send session details to newly connected socket
-    socket.emit('session', {
-      sessionID: socket.sessionID,
-      userID: socket.userID
-    })
-    console.log('emitting session to:', socket.userID)
-
-    // persist session as key, value
-    this.serverStorage.saveSession(socket.sessionID, {
-      userID: socket.userID,
-      username: socket.username,
-      gameID: socket.gameID,
-      isHost: socket.isHost,
-      connected: true
-    })
-    console.log('server saving', socket.username + "'s session as:", socket.userID)
-    // console.log('called servstore', this.serverStorage.findAllSessions())
-
-    // update playerlist
-    const players = this.getPlayers()
-    console.log('sending', players, 'to players')
-    this.emitToRoom('updatePlayers', players)
   }
 
   leaveLobby(socket: MySocket) {
@@ -220,4 +231,7 @@ export default class Lobby {
     })
     return playerPacket
   }
+
+  // Tools ------------------------------------
+
 }

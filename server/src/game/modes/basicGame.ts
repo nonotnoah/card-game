@@ -25,6 +25,8 @@ class BasicGame {
   gameState: GameState
   currentRules: string[]
   rules: FunctionList
+  readyList: string[]
+  userIDs: string[]
   constructor(io: Server, players: Players, gameID: string, Deck: Deck) {
     this.io = io
     this.players = players
@@ -32,8 +34,10 @@ class BasicGame {
     this.deck = Deck
 
     this.sockets = Object.values(this.players)
+    this.userIDs = Object.keys(this.players)
     this.rules = this.initRules()
     this.currentRules = []
+    this.readyList = []
     this.gameState = { // init with default values
       cardsRemaining: this.deck.length(),
       middleCard: { state: 'faceUp', symbols: [] },
@@ -52,6 +56,7 @@ class BasicGame {
 
     // add default listeners to all
     // this.addListenersToAll(this.rules)
+    this.addListenersToAll({ funcs: [this.addReady] })
   }
 
   // tools -----------------------------------------
@@ -60,10 +65,9 @@ class BasicGame {
    * to return list of game event listeners!
   */
   initRules() {
-    let functions: FunctionList
-    functions = {
+    const functions: FunctionList = {
       funcs: [
-        this.initializer
+        this.addReady
       ]
     }
     return functions
@@ -100,25 +104,16 @@ class BasicGame {
   // automatic:
   addListenerToAll(this.rules) 
   */
-  addListenersToAll(listeners: (Function | FunctionList)) {
-    if (instanceOfFunctionList(listeners)) {
-      listeners.funcs.map((func: Function) => {
-        Object.values(this.players).map(socket => {
-          socket.on(func.name, (res: any) => {
-            func(res, socket)
-          })
-        })
-        this.currentRules.push(func.name)
-      })
-    } else {
+  addListenersToAll({ funcs }: FunctionList) {
+    funcs.map((func: Function) => {
       Object.values(this.players).map(socket => {
-        socket.on(listeners.name, (res: any) => {
-          listeners(res, socket)
+        socket.on(func.name, (res: any) => {
+          func(res, socket)
         })
-        this.currentRules.push(listeners.name)
       })
-    }
-    console.log('Added listeners:', listeners, 'to', this.gameID)
+      this.currentRules.push(func.name)
+    })
+    console.log('Added listeners:', funcs, 'to', this.gameID)
   }
 
   /** 
@@ -144,23 +139,15 @@ class BasicGame {
   // automatic:
   removeListenerFromAll(this.rules) 
   */
-  removeListenerFromAll(listeners: (Function | FunctionList)) {
-    if (instanceOfFunctionList(listeners)) {
-      listeners.funcs.map((func: Function) => {
-        Object.values(this.players).map(socket => {
-          socket.removeListener(func.name, () => func())
-        })
-        const idx = this.currentRules.indexOf(func.name)
-        delete this.currentRules[idx]
-      })
-    } else {
+  removeListenerFromAll({ funcs }: FunctionList) {
+    funcs.map((func: Function) => {
       Object.values(this.players).map(socket => {
-        socket.removeListener(listeners.name, () => listeners())
+        socket.removeListener(func.name, () => func())
       })
-      const idx = this.currentRules.indexOf(listeners.name)
+      const idx = this.currentRules.indexOf(func.name)
       delete this.currentRules[idx]
-    }
-    console.log('Removed', listeners, 'from room:', this.gameID)
+    })
+    console.log('Removed', funcs, 'from room:', this.gameID)
   }
 
   /** 
@@ -192,6 +179,30 @@ class BasicGame {
     delete this.players[socket.userID]
   }
 
+  /** @returns true if expected players have joined
+   * 
+   */
+  checkReady(startAttempts: number) {
+    if (startAttempts > 9) { // if after 10 attempts all players haven't connected
+      const notConnected = this.userIDs.filter(val => !this.readyList.includes(val));
+      notConnected.map(userID => { // delete unconnected players
+        delete this.players[userID]
+      })
+      this.emitToRoom('playerLeave', this.gameState)
+    }
+    if (this.readyList.length == this.userIDs.length) {
+      const diffList = this.readyList.filter(val => !this.userIDs.includes(val));
+      if (diffList.length == 0) { // if readyList and userIDs are the same
+        return true
+      } else { // if foreign userIDs are detected?
+        diffList.map(userID => {
+          delete this.players[userID]
+        })
+        this.emitToRoom('playerLeave', this.gameState)
+      }
+    }
+    return false
+  }
   // tools -----------------------------------------
 
   // TEMPLATE
@@ -199,7 +210,9 @@ class BasicGame {
   // Rules/Listeners -------------------------------
 
   // this is for init value of this.currentRules
-  private initializer(res: any, socket: MySocket) { }
+  addReady(userID: string, socket: MySocket) {
+    this.readyList.push(userID)
+  }
 
   // correct(guess: string, socket: MySocket) {
   //   if (guess === this.cards.match) {

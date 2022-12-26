@@ -13,6 +13,7 @@ class Deck {
   cardsCopy: string[][]
 
   constructor(n: number, imgs: string[] = emojis) {
+    n = n - 1 // to get real number of symbols
     this.rangeArray = this.range(n)
     this.nValue = n
     this.cards = this.makeDeck(n, imgs)

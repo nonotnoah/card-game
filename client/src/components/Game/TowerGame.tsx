@@ -7,16 +7,21 @@ import MidCard from './MidCard'
 import MyEmojis from './MyEmojis'
 import Players from './Players'
 import { useEffect, useState } from 'react'
-import { io } from 'socket.io-client'
+import { Socket } from 'socket.io-client'
 import GameState from '../../../../server/src/interfaces/GameState' // LOL
 
+interface MySocket extends Socket {
+  [key: string]: any;
+}
+interface SocketProps {
+  socket: MySocket;
+}
 interface CardObj {
   state: string,
   symbols: string[] | undefined
 }
 
-export default function TowerGame() {
-  const socket = io()
+export default function TowerGame({ socket }: SocketProps) {
   const [gameState, setGameState] = useState<GameState>({
     cardsRemaining: 50,
     middleCard: {
@@ -24,13 +29,14 @@ export default function TowerGame() {
       symbols: ['😎', '😎', '😎', '😎', '😎', '😎', '😎', '😎']
     },
     connectedPlayers: {
-      'asfa': {
-        isHost: true,
-        username: 'Dasher',
-        score: 0,
+      [socket.userID]: {
+        isHost: socket.isHost,
+        username: socket.username,
+        score: 1,
         card: {
           state: 'faceUp',
-          symbols: ['😎', '😎', '😎', '😎', '😎', '😎', '😎', '😎']
+          // symbols: ['😎', '😎', '😎', '😎', '😎', '😎', '😎', '😎']
+          symbols: []
         }
       },
       'asdf': {
@@ -82,6 +88,10 @@ export default function TowerGame() {
   }) // maybe this is a useref so you don't have to update the whole dom - test the performance of this
 
   useEffect(() => {
+    socket.emit('ready')
+  }, [])
+
+  useEffect(() => {
     socket.on('update', (updatedGameState: GameState) => {
       setGameState(updatedGameState)
     })
@@ -103,6 +113,7 @@ export default function TowerGame() {
     };
   }, [socket]);
 
+  // testing
   const handleClick = () => {
     setGameState({
       ...gameState,
@@ -119,9 +130,9 @@ export default function TowerGame() {
   }
   return (
     <div className="game-wrapper">
-      <button onClick={() => handleClick()}>click</button>
+      {/* <button onClick={() => handleClick()}>click</button> */}
       <MidCard card={gameState.middleCard}></MidCard>
-      <MyEmojis card={gameState.connectedPlayers['asdf'].card}></MyEmojis>
+      <MyEmojis card={gameState.connectedPlayers[socket.userID].card}></MyEmojis>
       <Players connectedPlayers={gameState.connectedPlayers}></Players>
     </div>
   )

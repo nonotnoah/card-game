@@ -6,6 +6,7 @@ import ClientGame from '../ClientGame'
 import SettingsDisplay from './SettingsDisplay'
 import Lobby from './Lobby'
 import PlayersColumn from './PlayersColumn'
+import TowerGame from '../Game/TowerGame'
 
 interface MySocket extends Socket {
   [key: string]: any
@@ -73,7 +74,7 @@ export default function JoinLobbyRoom({ socket, onCancel }: LobbyProps) {
           />
         </div >
       ) : (
-        <ClientGame socket={socket} />
+        <TowerGame socket={socket} />
       )}
     </div >
   )

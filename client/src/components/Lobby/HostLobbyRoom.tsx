@@ -7,6 +7,7 @@ import { Socket } from "socket.io-client";
 import "../../styles/LobbyRoom.scss";
 import SettingsColumn from "./SettingsColumn";
 import PlayersColumn from "./PlayersColumn";
+import TowerGame from "../Game/TowerGame";
 
 interface MySocket extends Socket {
   [key: string]: any
@@ -40,7 +41,7 @@ export default function HostLobbyRoom({ socket, onCancel }: LobbyProps) {
     onCancel()
   }
   const handleStart = () => {
-    socket.emit('start')
+    socket.emit('start', 'tower')
     setWaitingForPlayers(false)
   }
 
@@ -78,7 +79,7 @@ export default function HostLobbyRoom({ socket, onCancel }: LobbyProps) {
           />
         </div>
       ) : (
-        <ClientGame socket={socket} />
+        <TowerGame socket={socket} />
       )}
     </div>
   );

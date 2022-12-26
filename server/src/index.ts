@@ -78,7 +78,7 @@ io.on('connection', (socket: MySocket) => {
     currentLobbies[socket.gameID].joinLobby(socket)
     // reconnect if applicable
     if (currentLobbies[socket.gameID].gameStarted) {
-      currentLobbies[socket.gameID].currentGame.reconnect(socket)
+      currentLobbies[socket.gameID].currentGame?.reconnect(socket)
     }
   }
 

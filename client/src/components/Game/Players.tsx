@@ -1,4 +1,5 @@
 import { useRef } from 'react'
+import { getEmoji } from '../../utils/animalEmojis'
 interface CardObj {
   state: string,
   symbols: string[] | undefined
@@ -29,7 +30,7 @@ export default function Players({ connectedPlayers }: PlayerProps) {
         {players?.flatMap(userID => (
           players.indexOf(userID)%2 != 0 ? [] : [ // if player is even
             <div className="player-wrapper">
-              <div className="username">{`${connectedPlayers[userID].username} ${connectedPlayers[userID].isHost ? '(host)' : ''}`}</div>
+              <div className="username">{`${getEmoji(connectedPlayers[userID].username)} ${connectedPlayers[userID].username} ${connectedPlayers[userID].isHost ? '(host)' : ''}`}</div>
               <div className="player-emojis">
                 {connectedPlayers[userID].card.state == 'faceUp' ? (
                   connectedPlayers[userID].card.symbols?.map(emoji => (
@@ -49,7 +50,7 @@ export default function Players({ connectedPlayers }: PlayerProps) {
         {players?.flatMap(userID => (
           players.indexOf(userID)%2 == 0 ? [] : [ // if player is odd
             <div className="player-wrapper">
-              <div className="username">{`${connectedPlayers[userID].username} ${connectedPlayers[userID].isHost ? '(host)' : ''}`}</div>
+              <div className="username">{`${getEmoji(connectedPlayers[userID].username)} ${connectedPlayers[userID].username} ${connectedPlayers[userID].isHost ? '(host)' : ''}`}</div>
               <div className="player-emojis">
                 {connectedPlayers[userID].card.state == 'faceUp' ? (
                   connectedPlayers[userID].card.symbols?.map(emoji => (

@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react"
 import { Socket } from "socket.io-client"
 import '../../styles/Lobby.scss'
-import animalEmojis from "../../utils/animalEmojis"
+import { animalEmojis, getEmoji } from "../../utils/animalEmojis"
 
 interface MySocket extends Socket {
   [key: string]: any
@@ -38,14 +38,10 @@ export default function Lobby({ socket }: SocketProps) {
     }
   }, [socket])
   if (playerList.current.length == 0) {
-     socket.emit('needPlayers')
+    socket.emit('needPlayers')
   }
 
-  let emoji
-  const getEmoji = (username: string) => {
-    emoji = animalEmojis[username]
-    return emoji
-  }
+  // return random emoji and set socket.username to it
 
   return (
     <ul className="player-list">

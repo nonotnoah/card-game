@@ -7,13 +7,19 @@ interface CardProps {
 }
 
 export default function MidCard({ card }: CardProps) {
+  let key = 0
+  const midKey = () => {
+    key ++
+    console.log(key)
+    return key.toString()
+  }
   const faceDown = ['🚫', '🚫', '🚫', '🚫', '🚫', '🚫', '🚫', '🚫']
   return (
     <div className="mid-card-wrapper">
       <div className="mid-card">
         {card.state == 'faceUp' ? (
           card.symbols?.map(emoji => (
-            <div className="symbol-wrapper">
+            <div key={midKey()} className="symbol-wrapper">
               <span>{emoji}</span>
             </div>
           ))

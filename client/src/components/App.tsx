@@ -21,10 +21,10 @@ function App() {
   return (
     <div className="wrapper">
       {loggedIn ? (
-        <ClientGame socket={socket.current}></ClientGame>
+        // <ClientGame socket={socket.current}></ClientGame>
+        <TowerGame socket={socket.current}></TowerGame>
       ) : (
-        // <Lobbies />
-        <TowerGame></TowerGame>
+        <Lobbies />
       )}
     </div>
   )

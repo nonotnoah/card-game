@@ -29,7 +29,8 @@ export default function Lobbies() {
     });
 
     // save session
-    socket.current.on("session", ({ sessionID, userID }) => {
+    socket.current.on("session", ({ username, sessionID, userID }) => {
+      socket.current.username = username
       console.log('setting userID:', userID)
       socket.current.auth = { sessionID };
       socket.current.userID = userID

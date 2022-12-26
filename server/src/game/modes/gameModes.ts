@@ -16,7 +16,17 @@ export class TowerGame extends BasicGame {
     this.rules = this.initRules() // Override BasicGame rules
     this.addListenersToAll(this.rules)
     // debug check if current rules work
-    console.log(this.currentRules)
+    console.log('CURRENT RULES:', this.currentRules)
+
+    let startAttempts = 0
+    while (!this.checkReady(startAttempts)) {
+      setTimeout(() => { }, 1000);
+      startAttempts ++
+      if (startAttempts > 10) {
+        this.endGame('Game failed to start')
+        break
+      }
+    }
     this.firstTurn()
   }
 
@@ -33,7 +43,6 @@ export class TowerGame extends BasicGame {
       ]
     }
     return functions
-    // return Array<(res: any, socket: MySocket) => void>
   }
 
   /**
@@ -108,7 +117,9 @@ export class TowerGame extends BasicGame {
     return false
   }
 
-  endGame() { }
+  endGame(reason: string) {
+    this.emitToRoom('endGame', reason)
+  }
 
   // Gamestate/Emitters ----------------------------
 
