@@ -48,12 +48,12 @@ export default class Lobby {
     this.connectedPlayers[socket.userID] = socket
 
     // add lobby listeners
-    this.addListenerTo(socket, 'start', this.start)
-    this.addListenerTo(socket, 'disconnect', this.disconnect)
-    this.addListenerTo(socket, 'end', this.endGame)
-    this.addListenerTo(socket, 'sizeChange', this.sizeChange)
-    this.addListenerTo(socket, 'needSizeChange', this.needSizeChange)
-    this.addListenerTo(socket, 'needPlayers', this.needPlayers)
+    this.addAnonListenerTo(socket, 'start', this.start)
+    this.addAnonListenerTo(socket, 'disconnect', this.disconnect)
+    this.addAnonListenerTo(socket, 'end', this.endGame)
+    this.addAnonListenerTo(socket, 'sizeChange', this.sizeChange)
+    this.addAnonListenerTo(socket, 'needSizeChange', this.needSizeChange)
+    this.addAnonListenerTo(socket, 'needPlayers', this.needPlayers)
 
     // join socket to room
     socket.join(socket.gameID)
@@ -196,7 +196,7 @@ export default class Lobby {
   // Tools ------------------------------------
 
   // add listener to socket
-  addListenerTo(socket: MySocket, listener: string, func: Function) {
+  addAnonListenerTo(socket: MySocket, listener: string, func: Function) {
     socket.on(listener, (res?: any) => {
       if (res) {
         func(socket, res)

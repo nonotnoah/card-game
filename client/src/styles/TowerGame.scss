@@ -12,6 +12,21 @@ div {
   height: 100vh;
   user-select: none;
 }
+.ready {
+  z-index: 11;
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  top: 35%;
+  left: 50%;
+  margin: 0 auto;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 .mid-card-wrapper {
   z-index: 10;
   position: absolute;

@@ -18,16 +18,28 @@ export class TowerGame extends BasicGame {
     // debug check if current rules work
     console.log('CURRENT RULES:', this.currentRules)
 
-    let startAttempts = 0
-    while (!this.checkReady(startAttempts)) {
-      setTimeout(() => { }, 1000);
-      startAttempts ++
-      if (startAttempts > 10) {
-        this.endGame('Game failed to start')
-        break
+    // show currently connected players
+    this.sockets.map(socket => {
+      this.gameState.connectedPlayers[socket.userID].username = socket.username
+    })
+    
+    //try to start game every second
+    const loop = setInterval(async () => {
+      // console.log('checking for ready');
+      this.emitToRoom('update', this.gameState)
+      
+      const result = await this.checkReady() 
+      if (this.startAttempts > 600) { // game can wait for 10 min before closing
+        clearInterval(loop)
+        console.log('nobody was ready');
+        this.endGame('Game closed due to inactivity')
       }
-    }
-    this.firstTurn()
+      if (result) {
+        clearInterval(loop)
+        this.startAttempts = 0
+        this.firstTurn()
+      }
+    }, 1000)
   }
 
   // tools -----------------------------------------
@@ -81,11 +93,13 @@ export class TowerGame extends BasicGame {
   // Gamestate/Emitters ----------------------------
 
   firstTurn() {
+    this.gameState.isRunning = true
     // give every player facedown card
     this.sockets.map(socket => {
       let card = this.deck.drawCard('faceDown')
       socket.emit('draw', card)
       this.gameState.connectedPlayers[socket.userID].card = card
+      this.gameState.connectedPlayers[socket.userID].ready = false
     })
 
     // draw middle card
@@ -97,8 +111,12 @@ export class TowerGame extends BasicGame {
 
     // update client on gamestate
     this.emitToRoom('update', this.gameState)
+    
+    this.sockets.map(socket => {
+      this.gameState.connectedPlayers[socket.userID].card.state = 'faceUp'
+    })
     // trigger timer to reveal personal cards
-    this.emitToRoom('reveal', 0)
+    this.emitToRoom('reveal', this.gameState, 3)
   }
 
   /**

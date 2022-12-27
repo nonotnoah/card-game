@@ -1,4 +1,5 @@
 import emojis from "./emojis"
+import { shuffleArray, shuffleDeck } from './shuffle'
 // why doesn't this work
 // type SpecialArray = (number | number[] | string)[]
 type SpecialArray = any[]
@@ -16,9 +17,9 @@ class Deck {
     n = n - 1 // to get real number of symbols
     this.rangeArray = this.range(n)
     this.nValue = n
-    this.cards = this.makeDeck(n, imgs)
+    this.cards = this.makeDeck(n, shuffleArray(imgs))
     // make a deep copy of the deck
-    this.cardsCopy = [...this.cards]
+    this.cardsCopy = shuffleDeck([...this.cards])
     // this.test()
   }
 

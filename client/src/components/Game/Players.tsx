@@ -6,20 +6,23 @@ interface CardObj {
 }
 interface PlayerProps {
   connectedPlayers: {
-    [username: string]: {
+    [userID: string]: {
       isHost: boolean
       username: string
+      ready: boolean
       score: number
       card: CardObj
     }
-  }
+  },
+  myUserID: string
 }
-export default function Players({ connectedPlayers }: PlayerProps) {
+export default function Players({ connectedPlayers, myUserID }: PlayerProps) {
   const players = Object.keys(connectedPlayers)
   const numPlayers = players.length
   let ct = 0
 
-  const faceDown = ['🚫', '🚫', '🚫', '🚫', '🚫', '🚫', '🚫', '🚫']
+  // const faceDown = ['🚫', '🚫', '🚫', '🚫', '🚫', '🚫', '🚫', '🚫']
+  const faceDown: string[] = ['❓']
 
 
   // }
@@ -28,9 +31,16 @@ export default function Players({ connectedPlayers }: PlayerProps) {
     <div className='player-wrapper-lg'>
       <div className="player-wrapper-left">
         {players?.flatMap(userID => (
-          players.indexOf(userID)%2 != 0 ? [] : [ // if player is even
+          players.indexOf(userID) % 2 != 0 ? [] : [ // if player is even
             <div className="player-wrapper">
-              <div className="username">{`${getEmoji(connectedPlayers[userID].username)} ${connectedPlayers[userID].username} ${connectedPlayers[userID].isHost ? '(host)' : ''}`}</div>
+              <div className="username">{`
+              ${getEmoji(connectedPlayers[userID].username)} 
+              ${connectedPlayers[userID].username} 
+              ${connectedPlayers[userID].isHost ? '(host)' : ''}
+              ${userID == myUserID ? '(you)' : ''}
+              ${connectedPlayers[userID].ready ? '✅' : ''}
+              `}
+              </div>
               <div className="player-emojis">
                 {connectedPlayers[userID].card.state == 'faceUp' ? (
                   connectedPlayers[userID].card.symbols?.map(emoji => (
@@ -48,9 +58,16 @@ export default function Players({ connectedPlayers }: PlayerProps) {
       </div>
       <div className="player-wrapper-right">
         {players?.flatMap(userID => (
-          players.indexOf(userID)%2 == 0 ? [] : [ // if player is odd
+          players.indexOf(userID) % 2 == 0 ? [] : [ // if player is odd
             <div className="player-wrapper">
-              <div className="username">{`${getEmoji(connectedPlayers[userID].username)} ${connectedPlayers[userID].username} ${connectedPlayers[userID].isHost ? '(host)' : ''}`}</div>
+              <div className="username">{`
+              ${getEmoji(connectedPlayers[userID].username)} 
+              ${connectedPlayers[userID].username} 
+              ${connectedPlayers[userID].isHost ? '(host)' : ''}
+              ${userID == myUserID ? '(you)' : ''}
+              ${connectedPlayers[userID].ready ? '✅' : ''}
+              `}
+              </div>
               <div className="player-emojis">
                 {connectedPlayers[userID].card.state == 'faceUp' ? (
                   connectedPlayers[userID].card.symbols?.map(emoji => (

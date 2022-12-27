@@ -27,6 +27,7 @@ class BasicGame {
   rules: FunctionList
   readyList: string[]
   userIDs: string[]
+  startAttempts
   constructor(io: Server, players: Players, gameID: string, Deck: Deck) {
     this.io = io
     this.players = players
@@ -38,7 +39,9 @@ class BasicGame {
     this.rules = this.initRules()
     this.currentRules = []
     this.readyList = []
+    this.startAttempts = 0
     this.gameState = { // init with default values
+      isRunning: false,
       cardsRemaining: this.deck.length(),
       middleCard: { state: 'faceUp', symbols: [] },
       connectedPlayers: {}
@@ -49,6 +52,7 @@ class BasicGame {
       this.gameState.connectedPlayers[userID] = {
         isHost: MySocket.isHost,
         username: MySocket.username,
+        ready: false,
         score: 1,
         card: { state: 'faceDown', symbols: [] }
       }
@@ -56,7 +60,7 @@ class BasicGame {
 
     // add default listeners to all
     // this.addListenersToAll(this.rules)
-    this.addListenersToAll({ funcs: [this.addReady] })
+    this.addAnonListenerToAll('ready', this.ready)
   }
 
   // tools -----------------------------------------
@@ -67,7 +71,7 @@ class BasicGame {
   initRules() {
     const functions: FunctionList = {
       funcs: [
-        this.addReady
+        this.ready
       ]
     }
     return functions
@@ -114,6 +118,20 @@ class BasicGame {
       this.currentRules.push(func.name)
     })
     console.log('Added listeners:', funcs, 'to', this.gameID)
+  }
+
+  private addAnonListenerToAll(listener: string, func: Function) {
+    Object.values(this.players).map(socket => {
+      socket.on(listener, (res?: any) => {
+        if (res) {
+          func(res, socket)
+        } else {
+          func(socket)
+        }
+      })
+    })
+    this.currentRules.push(listener)
+    console.log('Added listener:', listener, 'to', this.gameID)
   }
 
   /** 
@@ -182,14 +200,14 @@ class BasicGame {
   /** @returns true if expected players have joined
    * 
    */
-  checkReady(startAttempts: number) {
-    if (startAttempts > 9) { // if after 10 attempts all players haven't connected
-      const notConnected = this.userIDs.filter(val => !this.readyList.includes(val));
-      notConnected.map(userID => { // delete unconnected players
-        delete this.players[userID]
-      })
-      this.emitToRoom('playerLeave', this.gameState)
-    }
+  async playersReady(startAttempts: number) {
+    // if (startAttempts > 9) { // if after 10 attempts all players haven't connected
+    //   const notConnected = this.userIDs.filter(val => !this.readyList.includes(val));
+    //   notConnected.map(userID => { // delete unconnected players
+    //     delete this.players[userID]
+    //   })
+    //   this.emitToRoom('playerLeave', this.gameState)
+    // }
     if (this.readyList.length == this.userIDs.length) {
       const diffList = this.readyList.filter(val => !this.userIDs.includes(val));
       if (diffList.length == 0) { // if readyList and userIDs are the same
@@ -203,6 +221,12 @@ class BasicGame {
     }
     return false
   }
+
+  async checkReady() {
+    this.startAttempts++
+    return await this.playersReady(this.startAttempts)
+  }
+
   // tools -----------------------------------------
 
   // TEMPLATE
@@ -210,7 +234,10 @@ class BasicGame {
   // Rules/Listeners -------------------------------
 
   // this is for init value of this.currentRules
-  addReady(userID: string, socket: MySocket) {
+  ready = (userID: string, socket: MySocket) => {
+    console.log(socket.username, 'is ready')
+    this.gameState.connectedPlayers[userID].ready = true
+    this.emitToRoom('update', this.gameState)
     this.readyList.push(userID)
   }
 

@@ -7,7 +7,8 @@ interface CardProps {
 }
 
 export default function MyEmojis({ card }: CardProps) {
-  const faceDown = ['🚫', '🚫', '🚫', '🚫', '🚫', '🚫', '🚫', '🚫']
+  // const faceDown = ['🚫', '🚫', '🚫', '🚫', '🚫', '🚫', '🚫', '🚫']
+  const faceDown: string[] = []
   return (
     <div className="my-emoji-wrapper">
       <div className="my-emojis">

@@ -10,23 +10,23 @@ export default function MidCard({ card }: CardProps) {
   let key = 0
   const midKey = () => {
     key ++
-    console.log(key)
     return key.toString()
   }
-  const faceDown = ['🚫', '🚫', '🚫', '🚫', '🚫', '🚫', '🚫', '🚫']
+  // const faceDown = ['🚫', '🚫', '🚫', '🚫', '🚫', '🚫', '🚫', '🚫']
+  const faceDown: string[] = []
   return (
     <div className="mid-card-wrapper">
       <div className="mid-card">
         {card.state == 'faceUp' ? (
           card.symbols?.map(emoji => (
-            <div key={midKey()} className="symbol-wrapper">
-              <span>{emoji}</span>
+            <div className="symbol-wrapper">
+              <span key={midKey()}>{emoji}</span>
             </div>
           ))
         ) : (
           faceDown.map(emoji => (
             <div className="symbol-wrapper">
-              <span>{emoji}</span>
+              <span key={midKey()}>{emoji}</span>
             </div>
           ))
         )}
