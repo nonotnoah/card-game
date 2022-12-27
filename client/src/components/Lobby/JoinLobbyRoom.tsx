@@ -28,6 +28,7 @@ const URL: string = 'http://localhost:5000'
 // export default function JoinLobbyRoom({ socket, gameID, onCancel }: LobbyProps) {
 export default function JoinLobbyRoom({ socket, onCancel }: LobbyProps) {
   const [waitingForPlayers, setWaitingForPlayers] = useState(true)
+  const [gameStarted, setGameStarted] = useState(false)
   const [size, setSize] = useState<SizeProps>({
     symbol: 8,
     name: 'Normal',
@@ -35,18 +36,28 @@ export default function JoinLobbyRoom({ socket, onCancel }: LobbyProps) {
   })
 
   useEffect(() => {
+    socket.on('gameStarted', () => {
+      setWaitingForPlayers(false)
+      setGameStarted(true)
+    })
     socket.on('start', () => {
       setWaitingForPlayers(false)
     })
     socket.on('sizeChange', (res: SizeProps) => {
       setSize(res)
     })
+    // socket.on('reconnect', () => {
+    //   console.log('reconnecting')
+    //   setWaitingForPlayers(false)
+    // })
     return (): void => {
       socket.removeAllListeners();
     };
   }, [socket]);
 
+  // on component render
   useEffect(() => {
+    socket.emit('isGameStarted')
     socket.emit('needSizeChange')
   }, [])
 
@@ -73,6 +84,8 @@ export default function JoinLobbyRoom({ socket, onCancel }: LobbyProps) {
             size={size}
           />
         </div >
+      ) : gameStarted ? (
+        <TowerGame initEvent='reconnect' socket={socket} />
       ) : (
         <TowerGame socket={socket} />
       )}

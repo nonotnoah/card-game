@@ -7,6 +7,7 @@ export default interface GameState {
   }
   connectedPlayers: {
     [userID: string]: {
+      connected: boolean
       isHost: boolean
       username: string
       ready: boolean

@@ -50,6 +50,7 @@ class BasicGame {
     // map player info to gamestate
     for (const [userID, MySocket] of Object.entries(this.players)) {
       this.gameState.connectedPlayers[userID] = {
+        connected: true,
         isHost: MySocket.isHost,
         username: MySocket.username,
         ready: false,
@@ -61,6 +62,7 @@ class BasicGame {
     // add default listeners to all
     // this.addListenersToAll(this.rules)
     this.addAnonListenerToAll('ready', this.ready)
+    // this.addAnonListenerToAll('needUpdate', this.needUpdate)
   }
 
   // tools -----------------------------------------
@@ -83,6 +85,10 @@ class BasicGame {
   */
   emitToRoom(event: string, ...args: any[]) {
     this.io.in(this.gameID).emit(event, ...args)
+  }
+
+  emitUpdateGameState(reason: string) {
+    this.io.in(this.gameID).emit('update', reason, this.gameState)
   }
 
   /** 
@@ -120,7 +126,7 @@ class BasicGame {
     console.log('Added listeners:', funcs, 'to', this.gameID)
   }
 
-  private addAnonListenerToAll(listener: string, func: Function) {
+  addAnonListenerToAll(listener: string, func: Function) {
     Object.values(this.players).map(socket => {
       socket.on(listener, (res?: any) => {
         if (res) {
@@ -178,11 +184,15 @@ class BasicGame {
   * 
   * re-adds listeners to the current room
   */
-  reconnect(socket: MySocket) {
+  reconnect = (socket: MySocket) => { // IMPORTANT: called from index.ts
+    console.log('RECONNECTING', socket.username)
     socket.emit('reconnect', this.gameState)
     this.players[socket.userID] = socket // update with fresh socket
+    this.gameState.connectedPlayers[socket.userID].connected = true
     this.removeListenerFromAll(this.rules) // remove listeners
     this.addListenersToAll(this.rules) // add listeners
+    this.addAnonListenerToAll('ready', this.ready)
+    // this.addAnonListenerToAll('needUpdate', this.needUpdate)
   }
 
   /** 
@@ -191,10 +201,11 @@ class BasicGame {
   * 
   * removes socket from {this.players} 
   */
-  disconnect(socket: MySocket) {
-    this.emitToRoom('playerLeave', this.gameState)
+  disconnect(socket: MySocket) { // IMPORTANT: called from lobby.ts
     // TODO: have this trigger a "vote to continue without player" modal
+    this.gameState.connectedPlayers[socket.userID].connected = false
     delete this.players[socket.userID]
+    this.emitUpdateGameState('player leave')
   }
 
   /** @returns true if expected players have joined
@@ -216,7 +227,7 @@ class BasicGame {
         diffList.map(userID => {
           delete this.players[userID]
         })
-        this.emitToRoom('playerLeave', this.gameState)
+        this.emitToRoom('update', 'playerleave', this.gameState)
       }
     }
     return false
@@ -237,9 +248,13 @@ class BasicGame {
   ready = (userID: string, socket: MySocket) => {
     console.log(socket.username, 'is ready')
     this.gameState.connectedPlayers[userID].ready = true
-    this.emitToRoom('update', this.gameState)
+    this.emitToRoom('update', 'player ready', this.gameState)
     this.readyList.push(userID)
   }
+
+  // needUpdate = (socket: MySocket) => {
+  //   socket.emit('update', this.gameState)
+  // }
 
   // correct(guess: string, socket: MySocket) {
   //   if (guess === this.cards.match) {

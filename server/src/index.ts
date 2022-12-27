@@ -71,15 +71,25 @@ io.on('connection', (socket: MySocket) => {
       currentLobbies[socket.gameID].joinLobby(socket)
     } else { // isn't host, lobby doesn't exist
       socket.emit('lobbyNotFound')
+      socket.emit('alert', 'Lobby not found')
+      socket.disconnect()
       console.log('tried to join nonexistent lobby')
     }
   } else { // not host, lobby exists
-    socket.emit('lobbyFound')
-    currentLobbies[socket.gameID].joinLobby(socket)
-    // reconnect if applicable
     if (currentLobbies[socket.gameID].gameStarted) {
-      currentLobbies[socket.gameID].currentGame?.reconnect(socket)
+      socket.emit('alert', 'Cannot join game in progress')
+      socket.disconnect()
+    } else {
+      socket.emit('lobbyFound')
+      currentLobbies[socket.gameID].joinLobby(socket)
     }
+    // FIXME: create live game reconnect logic
+    // // reconnect if applicable
+    // if (currentLobbies[socket.gameID].currentGame && currentLobbies[socket.gameID].gameStarted) {
+    //   //@ts-expect-error
+    //   currentLobbies[socket.gameID].currentGame.reconnect(socket)
+    //   console.log('GAME STARTED:', currentLobbies[socket.gameID].gameStarted)
+    // }
   }
 
   // delete lobby if lobby exists and everyone disconnects

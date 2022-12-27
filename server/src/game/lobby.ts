@@ -54,6 +54,7 @@ export default class Lobby {
     this.addAnonListenerTo(socket, 'sizeChange', this.sizeChange)
     this.addAnonListenerTo(socket, 'needSizeChange', this.needSizeChange)
     this.addAnonListenerTo(socket, 'needPlayers', this.needPlayers)
+    this.addAnonListenerTo(socket, 'isGameStarted', this.isGameStarted)
 
     // join socket to room
     socket.join(socket.gameID)
@@ -119,12 +120,17 @@ export default class Lobby {
   }
 
   // make oldest connection host
-  newHost() {
+  newHost(oldHost: MySocket) {
     const players = Object.values(this.connectedPlayers)
-    if (players.length > 1) {
-      let newHost = players[1]
+    if (players.length > 0) {
+      let newHost = players[0] // old host has already been deleted
       newHost.isHost = true
-      this.emitToRoom('newHost', newHost.userID)
+      if (this.currentGame) {
+        this.currentGame.gameState.connectedPlayers[oldHost.userID].isHost = false
+        this.currentGame.gameState.connectedPlayers[newHost.userID].isHost = true
+        this.currentGame.emitUpdateGameState('new host')
+      }
+      this.emitToRoom('newHost', newHost.userID, this.currentGame?.gameState.isRunning)
     }
   }
 
@@ -133,7 +139,7 @@ export default class Lobby {
     console.log(socket.userID, 'cancelled')
     this.serverStorage.deleteSession(socket.sessionID)
     if (socket.isHost) {
-      this.newHost()
+      this.newHost(socket)
     }
     // socket disconnects on clientside, so leaveLobby and updatePlayers
     // are called in the disconnect method!
@@ -144,7 +150,7 @@ export default class Lobby {
   disconnect = (socket: MySocket) => {
     console.log('lobby.ts disconnect')
     // notify other users
-    socket.broadcast.emit("user disconnected", socket.userID);
+    // socket.broadcast.emit("user disconnected", socket.userID);
     // update the connection status of the session
     this.serverStorage.saveSession(socket.sessionID, {
       userID: socket.userID,
@@ -158,14 +164,14 @@ export default class Lobby {
     // and find new host but keep session 
     // data in server store for potential rc
     const players = Object.values(this.connectedPlayers)
-    if (this.gameStarted && socket.isHost && this.currentGame) {
-      this.currentGame.disconnect(socket) // dc from game
-      this.leaveLobby(socket) // dc from lobby
-      if (players.length > 0)
-        this.newHost()
-    } else if (!this.gameStarted) {
+    this.leaveLobby(socket) // dc from lobby
+    if (this.currentGame) {
+      // if (socket.isHost && players.length > 0)
+      if (socket.isHost)
+        this.newHost(socket) // this updates currentgame info too
+      this.currentGame.disconnect(socket) // this emits currentgame update
+    } else if (socket.isHost && !this.gameStarted) {
       this.cancel(socket)
-      this.leaveLobby(socket)
     }
     console.log('Socket Closed: ', socket.userID)
   }
@@ -188,7 +194,13 @@ export default class Lobby {
   needPlayers = (socket: MySocket) => {
     const players = this.getPlayers()
     console.log('sending', players, 'to', socket.username)
-    socket.emit('updatePlayers', players)
+    socket.emit('updatePlayers', players) // listener in Lobby.tsx
+  }
+
+  isGameStarted = (socket: MySocket) => {
+    if (this.gameStarted) {
+      socket.emit('gameStarted')
+    }
   }
 
   // Rules ------------------------------------
@@ -217,7 +229,7 @@ export default class Lobby {
     // update playerlist
     const players = this.getPlayers()
     console.log('sending', players, 'to players')
-    this.emitToRoom('updatePlayers', players)
+    this.emitToRoom('updatePlayers', players) // listener in Lobby.tsx
   }
 
   getPlayers() {

@@ -7,6 +7,7 @@ interface CardObj {
 interface PlayerProps {
   connectedPlayers: {
     [userID: string]: {
+      connected: boolean
       isHost: boolean
       username: string
       ready: boolean
@@ -33,12 +34,14 @@ export default function Players({ connectedPlayers, myUserID }: PlayerProps) {
         {players?.flatMap(userID => (
           players.indexOf(userID) % 2 != 0 ? [] : [ // if player is even
             <div className="player-wrapper">
-              <div className="username">{`
-              ${getEmoji(connectedPlayers[userID].username)} 
-              ${connectedPlayers[userID].username} 
-              ${connectedPlayers[userID].isHost ? '(host)' : ''}
-              ${userID == myUserID ? '(you)' : ''}
-              ${connectedPlayers[userID].ready ? '✅' : ''}
+              <div className={`
+              ${connectedPlayers[userID].connected == false ? 'disconnected' : ''} username`}>
+                {`
+                ${getEmoji(connectedPlayers[userID].username)} 
+                ${connectedPlayers[userID].username} 
+                ${connectedPlayers[userID].isHost ? '(host)' : ''}
+                ${userID == myUserID ? '(you)' : ''}
+                ${connectedPlayers[userID].ready ? '✅' : ''}
               `}
               </div>
               <div className="player-emojis">
@@ -60,12 +63,14 @@ export default function Players({ connectedPlayers, myUserID }: PlayerProps) {
         {players?.flatMap(userID => (
           players.indexOf(userID) % 2 == 0 ? [] : [ // if player is odd
             <div className="player-wrapper">
-              <div className="username">{`
-              ${getEmoji(connectedPlayers[userID].username)} 
-              ${connectedPlayers[userID].username} 
-              ${connectedPlayers[userID].isHost ? '(host)' : ''}
-              ${userID == myUserID ? '(you)' : ''}
-              ${connectedPlayers[userID].ready ? '✅' : ''}
+              <div className={`
+              ${connectedPlayers[userID].connected == false ? 'disconnected' : ''} username`}>
+                {`
+                ${getEmoji(connectedPlayers[userID].username)} 
+                ${connectedPlayers[userID].username} 
+                ${connectedPlayers[userID].isHost ? '(host)' : ''}
+                ${userID == myUserID ? '(you)' : ''}
+                ${connectedPlayers[userID].ready ? '✅' : ''}
               `}
               </div>
               <div className="player-emojis">

@@ -16,13 +16,14 @@ interface MySocket extends Socket {
 }
 interface SocketProps {
   socket: MySocket;
+  initEvent?: string
 }
 interface CardObj {
   state: string,
   symbols: string[] | undefined
 }
 
-export default function TowerGame({ socket }: SocketProps) {
+export default function TowerGame({ socket, initEvent }: SocketProps) {
   const [ready, setReady] = useState(false)
   const [countingDown, setCountingDown] = useState(false)
   const [count, setCount] = useState(0)
@@ -35,6 +36,7 @@ export default function TowerGame({ socket }: SocketProps) {
     },
     connectedPlayers: {
       [socket.userID]: {
+        connected: true,
         isHost: socket.isHost,
         username: socket.username,
         ready: false,
@@ -94,10 +96,21 @@ export default function TowerGame({ socket }: SocketProps) {
     }
   }) // maybe this is a useref so you don't have to update the whole dom - test the performance of this
 
+  switch (initEvent) {
+    case 'reconnect': {
+      socket.emit('reconnect') // gameModes.ts
+      break
+    }
+    case 'update': {
+      socket.emit('needUpdate')
+      break
+    }
+  }
+
   useEffect(() => {
-    socket.on('update', (updatedGameState: GameState) => {
+    socket.on('update', (reason, updatedGameState: GameState) => {
       setGameState(updatedGameState)
-      console.log('updated gameState', updatedGameState)
+      console.log('updated gameState', updatedGameState, 'because', reason)
     })
 
     socket.on('reveal', (updatedGameState: GameState, seconds: number) => {
@@ -126,6 +139,10 @@ export default function TowerGame({ socket }: SocketProps) {
       }, seconds * 1000)
     })
 
+    socket.on('playerLeave', (updatedGameState: GameState) => {
+      setGameState(updatedGameState)
+      // TODO: trigger vote
+    })
     // draw card
     socket.on("draw", (card: CardObj) => {
       // setGameState(gameState.)
@@ -149,6 +166,13 @@ export default function TowerGame({ socket }: SocketProps) {
       setCountingDown(false)
     }
   }, [count])
+
+  // ask for gameState on first render
+  useEffect(() => {
+    socket.emit('needUpdate')
+    console.log('asked for update')
+  }, [])
+
   // let ct = 0
   // const countDown = (seconds: number) => {
   //   ct = seconds
@@ -169,7 +193,7 @@ export default function TowerGame({ socket }: SocketProps) {
   }
   return (
     <div className="game-wrapper">
-      {/* <button onClick={() => handleClick()}>gamestate</button> */}
+      <button onClick={() => handleClick()}>gamestate</button>
       {!gameState.isRunning && (
         ready ? (
           <div className='ready' > Waiting for players...</div>
