@@ -15,9 +15,10 @@ interface PlayerProps {
       card: CardObj
     }
   },
+  match: { userID: string, guess: string }
   myUserID: string
 }
-export default function Players({ connectedPlayers, myUserID }: PlayerProps) {
+export default function Players({ connectedPlayers, match, myUserID }: PlayerProps) {
   const players = Object.keys(connectedPlayers)
   const numPlayers = players.length
   let ct = 0
@@ -47,7 +48,7 @@ export default function Players({ connectedPlayers, myUserID }: PlayerProps) {
               <div className="player-emojis">
                 {connectedPlayers[userID].card.state == 'faceUp' ? (
                   connectedPlayers[userID].card.symbols?.map(emoji => (
-                    <span>{emoji}</span>
+                    <span className={userID == match.userID ? emoji == match.guess ? 'flash-correct' : '' : ''}>{emoji}</span>
                   ))
                 ) : (
                   faceDown.map(emoji => (

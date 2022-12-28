@@ -4,9 +4,11 @@ interface CardObj {
 }
 interface CardProps {
   card: CardObj
+  match: { userID: string, guess: string }
+  myUserID: string
 }
 
-export default function MyEmojis({ card }: CardProps) {
+export default function MyEmojis({ card, match, myUserID }: CardProps) {
   // const faceDown = ['🚫', '🚫', '🚫', '🚫', '🚫', '🚫', '🚫', '🚫']
   const faceDown: string[] = []
   return (
@@ -15,7 +17,7 @@ export default function MyEmojis({ card }: CardProps) {
         {card.state == 'faceUp' ? (
           card.symbols?.map(emoji => (
             <div className="symbol-wrapper">
-              <span>{emoji}</span>
+              <span className={match.userID == myUserID ? match.guess == emoji ? 'flash-correct' : 'flash-wrong' : ''}>{emoji}</span>
             </div>
           ))
         ) : (

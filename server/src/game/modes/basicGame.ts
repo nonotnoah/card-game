@@ -55,6 +55,7 @@ class BasicGame {
         username: MySocket.username,
         ready: false,
         score: 1,
+        canPlay: true,
         card: { state: 'faceDown', symbols: [] }
       }
     }

@@ -99,6 +99,24 @@ div {
   }
 }
 
+.filter {
+  z-index: 11;
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  top: 35%;
+  left: 50%;
+  margin: 0 auto;
+
+  background-color: rgba(0, 0, 0, 0.432);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .my-emoji-wrapper {
   position: absolute;
   left: 50%;
@@ -153,6 +171,21 @@ div {
   color: rgb(119, 119, 119) 
 }
 
+.flash-correct {
+  animation-name: flash-gold;
+}
+.flash-wrong {
+  animation-name: flash-red;
+}
+
+@keyframes flash-red {
+  from {
+    background-color: rgba(255, 0, 0, 0.849);
+  }
+  to {
+    background-color: rgba(255, 166, 0, 0);
+  }
+}
 @keyframes flash-gold {
   from {
     background-color: rgba(255, 166, 0, 0.849);

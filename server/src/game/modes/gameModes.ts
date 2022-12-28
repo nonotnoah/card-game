@@ -14,8 +14,9 @@ export class TowerGame extends BasicGame {
   constructor(io: Server, players: Players, gameID: string, Deck: Deck) {
     super(io, players, gameID, Deck)
     this.rules = this.initRules() // Override BasicGame rules
-    this.addListenersToAll(this.rules)
+    // this.addListenersToAll(this.rules)
     this.addAnonListenerToAll('needUpdate', this.needUpdate)
+    this.addAnonListenerToAll('guess', this.guess)
     // debug check if current rules work
     console.log('CURRENT RULES:', this.currentRules)
 
@@ -23,13 +24,13 @@ export class TowerGame extends BasicGame {
     this.sockets.map(socket => {
       this.gameState.connectedPlayers[socket.userID].username = socket.username
     })
-    
+
     //try to start game every second
     const loop = setInterval(async () => {
       // console.log('checking for ready');
       this.emitUpdateGameState('refreshing lobby')
-      
-      const result = await this.checkReady() 
+
+      const result = await this.checkReady()
       if (this.startAttempts > 600) { // game can wait for 10 min before closing
         clearInterval(loop)
         console.log('nobody was ready');
@@ -53,7 +54,7 @@ export class TowerGame extends BasicGame {
     const functions = {
       funcs: [
         // this.needUpdate,
-        this.correct,
+        // this.correct,
         this.vote
       ]
     }
@@ -81,6 +82,7 @@ export class TowerGame extends BasicGame {
         username: socket.username,
         ready: true,
         score: 1,
+        canPlay: true,
         card: {
           state: 'faceDown',
           symbols: []
@@ -98,8 +100,10 @@ export class TowerGame extends BasicGame {
     this.emitUpdateGameState('client needed update')
   }
 
-  correct(guess: any, socket: MySocket) {
-    const match = this.deck.checkGuess(guess, this.gameState.middleCard)
+  guess = (guess: any, socket: MySocket) => {
+    console.log('guessed', guess)
+    const match = this.deck.checkGuess(guess, this.gameState.connectedPlayers[socket.userID].card)
+    console.log('found match with mid card', match)
     if (match) {
       const correctPayload = { userID: socket.userID, guess }
       this.emitToRoom('goodMatch', correctPayload)
@@ -109,9 +113,12 @@ export class TowerGame extends BasicGame {
       if (this.nextTurn()) {
         this.emitUpdateGameState('next turn')
       } else { } // endGame()?
+    } else { // player will not be able to guess until next turn/update
+      this.gameState.connectedPlayers[socket.userID].canPlay = false
+      this.emitUpdateGameState('bad match')
     }
-    // player will not be able to guess until next turn/update
-    this.emitToRoom('badMatch', socket.userID)
+    // this.emitToRoom('badMatch', socket.userID)
+    // socket.emit('badMatch')
   }
 
   vote(type: any, socket: MySocket) {
@@ -143,7 +150,7 @@ export class TowerGame extends BasicGame {
 
     // update client on gamestate
     this.emitUpdateGameState('show midcard before reveal')
-    
+
     this.sockets.map(socket => {
       this.gameState.connectedPlayers[socket.userID].card.state = 'faceUp'
     })
@@ -160,6 +167,9 @@ export class TowerGame extends BasicGame {
   nextTurn() {
     const newCard = this.deck.drawCard('faceUp')
     if (newCard.symbols) {
+      this.sockets.map(socket => {
+        this.gameState.connectedPlayers[socket.userID].canPlay = true
+      })
       this.gameState.middleCard = newCard
       this.gameState.cardsRemaining = this.deck.length()
       return true
