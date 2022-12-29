@@ -9,7 +9,6 @@ import Players from './Players'
 import { useEffect, useState } from 'react'
 import { Socket } from 'socket.io-client'
 import GameState from '../../../../server/src/interfaces/GameState' // LOL
-import Countdown from 'react-countdown'
 
 interface MySocket extends Socket {
   [key: string]: any;
@@ -28,6 +27,7 @@ export default function TowerGame({ socket, initEvent }: SocketProps) {
   const [countingDown, setCountingDown] = useState(false)
   const [count, setCount] = useState(0)
   const [match, setMatch] = useState({ userID: '', guess: '' })
+  const [hasGuessed, setHasGuessed] = useState(false)
   const [gameState, setGameState] = useState<GameState>({
     isRunning: false,
     cardsRemaining: 100,
@@ -43,6 +43,7 @@ export default function TowerGame({ socket, initEvent }: SocketProps) {
         ready: false,
         score: 1,
         canPlay: true,
+        guessTimes: [],
         card: {
           state: 'faceDown',
           symbols: []
@@ -98,6 +99,8 @@ export default function TowerGame({ socket, initEvent }: SocketProps) {
     }
   }) // maybe this is a useref so you don't have to update the whole dom - test the performance of this
 
+  const currentPlayer = gameState.connectedPlayers[socket.userID]
+
   switch (initEvent) {
     case 'reconnect': {
       socket.emit('reconnect') // gameModes.ts
@@ -120,6 +123,7 @@ export default function TowerGame({ socket, initEvent }: SocketProps) {
       if (reason == 'next turn') {
         asyncWait(setGameState, updatedGameState, 1250)
         asyncWait(setMatch, { userID: '', guess: '' }, 500)
+        setHasGuessed(true)
       } else {
         setGameState(updatedGameState)
       }
@@ -196,6 +200,7 @@ export default function TowerGame({ socket, initEvent }: SocketProps) {
   }
 
   const handleGuess = (emoji: string) => {
+    setHasGuessed(true)
     console.log('clicked', emoji)
     socket.emit('guess', emoji)
   }
@@ -217,24 +222,30 @@ export default function TowerGame({ socket, initEvent }: SocketProps) {
       {countingDown && (
         <div className='countdown ready'>{count}</div>
       )}
-      {!gameState.connectedPlayers[socket.userID].canPlay && (
+      {!currentPlayer.canPlay && (
         <div className='filter'>Wrong guess!</div>
       )}
-      {(gameState.connectedPlayers[socket.userID].canPlay && gameState.isRunning) && (
+      {(currentPlayer.canPlay && gameState.isRunning) && (
         <div className="center remaining">{gameState.cardsRemaining}</div>
       )}
       <MidCard
-        canPlay={gameState.connectedPlayers[socket.userID].canPlay}
+        hasGuessed={hasGuessed}
+        canPlay={currentPlayer.canPlay}
         countDown={countingDown}
-        match={match} onClick={(emoji) => handleGuess(emoji)}
+        match={match}
+        onClick={(emoji) => handleGuess(emoji)}
         card={gameState.middleCard}
-      ></MidCard>
+      />
       <MyEmojis
         match={match}
-        card={gameState.connectedPlayers[socket.userID].card}
+        card={currentPlayer.card}
         myUserID={socket.userID}
-      ></MyEmojis>
-      <Players match={match} connectedPlayers={gameState.connectedPlayers} myUserID={socket.userID}></Players>
+      />
+      <Players
+        match={match}
+        connectedPlayers={gameState.connectedPlayers}
+        myUserID={socket.userID}
+      />
     </div >
   )
 }

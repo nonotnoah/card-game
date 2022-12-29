@@ -5,6 +5,7 @@ interface CardObj {
   symbols: string[] | undefined
 }
 interface CardProps {
+  hasGuessed: boolean
   canPlay: boolean
   card: CardObj
   match: { userID: string, guess: string }
@@ -12,7 +13,7 @@ interface CardProps {
   countDown: boolean
 }
 
-export default function MidCard({ canPlay, card, onClick, match, countDown }: CardProps) {
+export default function MidCard({ hasGuessed, canPlay, card, onClick, match, countDown }: CardProps) {
   // const faceDown = ['🚫', '🚫', '🚫', '🚫', '🚫', '🚫', '🚫', '🚫']
   const [symbolClass, setSymbolClass] = useState('')
   const symbClassSet = useRef(false)
@@ -34,14 +35,14 @@ export default function MidCard({ canPlay, card, onClick, match, countDown }: Ca
     }
   }
 
+  // checkPlayable() // see if filter works
+
   const handleClick = (emoji: string) => {
-    if (canPlay) {
+    if (canPlay && !hasGuessed) {
       onClick(emoji)
     }
   }
   
-  checkPlayable()
-
   // animations 
   const [midClass, setMidClass] = useState('mid-card rotate')
   const startFadeIn = useRef(false)
@@ -71,10 +72,11 @@ export default function MidCard({ canPlay, card, onClick, match, countDown }: Ca
     console.log('spun middle card')
     setTimeout(() => {
       setMidClass('mid-card spinout')
-    }, 1000)
+    }, 1000) // wait 1s for flash
+    // card changes at 1250ms
     setTimeout(() => {
       setMidClass('mid-card rotate')
-    }, 1500)
+    }, 1500) // card stops spinning
   }
 
   if (countDown && !startFadeIn.current) {

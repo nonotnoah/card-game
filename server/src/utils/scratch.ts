@@ -1,6 +1,6 @@
 console.log('start');
 
-async function test(num) {
+async function test(num: number) {
   return num === 5
 }
 

@@ -8,6 +8,7 @@ import "../../styles/LobbyRoom.scss";
 import SettingsColumn from "./SettingsColumn";
 import PlayersColumn from "./PlayersColumn";
 import TowerGame from "../Game/TowerGame";
+import Podium from "./Podium"
 
 interface MySocket extends Socket {
   [key: string]: any
@@ -22,8 +23,28 @@ interface SizeProps {
   name: string
   description: string
 }
+interface Podium {
+  1: {
+    username: string
+    score: number
+    reactionTime: number
+  }
+  2: {
+    username: string
+    score: number
+    reactionTime: number
+  }
+  3: {
+    username: string
+    score: number
+    reactionTime: number
+  }
+}
+
 
 export default function HostLobbyRoom({ socket, onCancel }: LobbyProps) {
+  const [showPodium, setShowPodium] = useState(false)
+  const [podium, setPodium] = useState({} as Podium)
   const [waitingForPlayers, setWaitingForPlayers] = useState(true);
   const [size, setSize] = useState<SizeProps>({
     symbol: 8,
@@ -53,6 +74,13 @@ export default function HostLobbyRoom({ socket, onCancel }: LobbyProps) {
     socket.on('sizeChange', (res: SizeProps) => {
       setSize(res)
     })
+
+    socket.on('podium', (podium: Podium) => {
+      setPodium(podium)
+      setShowPodium(true)
+      setWaitingForPlayers(true)
+    })
+
     return (): void => {
       socket.removeAllListeners();
     };
@@ -63,9 +91,18 @@ export default function HostLobbyRoom({ socket, onCancel }: LobbyProps) {
     socket.emit('needSizeChange')
   }, [])
 
+  const handleClose = () => {
+    setShowPodium(false)
+  }
+
   return (
     <div className="wrapper">
-      {waitingForPlayers ? (
+      {showPodium ? (
+        <Podium
+          onClose={() => handleClose()}
+          podium={podium}
+        />
+      ) : waitingForPlayers ? (
         <div className="box">
           <PlayersColumn
             socket={socket}

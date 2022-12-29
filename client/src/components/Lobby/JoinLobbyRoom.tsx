@@ -7,6 +7,7 @@ import SettingsDisplay from './SettingsDisplay'
 import Lobby from './Lobby'
 import PlayersColumn from './PlayersColumn'
 import TowerGame from '../Game/TowerGame'
+import Podium from './Podium'
 
 interface MySocket extends Socket {
   [key: string]: any
@@ -23,10 +24,30 @@ interface SizeProps {
   description: string
 }
 
+interface Podium {
+  1: {
+    username: string
+    score: number
+    reactionTime: number
+  }
+  2: {
+    username: string
+    score: number
+    reactionTime: number
+  }
+  3: {
+    username: string
+    score: number
+    reactionTime: number
+  }
+}
+
 const URL: string = 'http://localhost:5000'
 
 // export default function JoinLobbyRoom({ socket, gameID, onCancel }: LobbyProps) {
 export default function JoinLobbyRoom({ socket, onCancel }: LobbyProps) {
+  const [showPodium, setShowPodium] = useState(false)
+  const [podium, setPodium] = useState({} as Podium)
   const [waitingForPlayers, setWaitingForPlayers] = useState(true)
   const [gameStarted, setGameStarted] = useState(false)
   const [size, setSize] = useState<SizeProps>({
@@ -50,6 +71,11 @@ export default function JoinLobbyRoom({ socket, onCancel }: LobbyProps) {
     //   console.log('reconnecting')
     //   setWaitingForPlayers(false)
     // })
+    socket.on('podium', (podium: Podium) => {
+      setPodium(podium)
+      setShowPodium(true)
+      setWaitingForPlayers(true)
+    })
     return (): void => {
       socket.removeAllListeners();
     };
@@ -71,9 +97,18 @@ export default function JoinLobbyRoom({ socket, onCancel }: LobbyProps) {
     onCancel()
   }
 
+  const handleClose = () => {
+    setShowPodium(false)
+  }
+
   return (
     <div className="wrapper">
-      {waitingForPlayers ? (
+      {showPodium ? (
+        <Podium
+          onClose={() => handleClose()}
+          podium={podium}
+        />
+      ) : waitingForPlayers ? (
         <div className="box">
           <PlayersColumn
             socket={socket}

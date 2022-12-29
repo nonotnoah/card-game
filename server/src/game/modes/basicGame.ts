@@ -28,12 +28,14 @@ class BasicGame {
   readyList: string[]
   userIDs: string[]
   startAttempts
+  timeStart: number
   constructor(io: Server, players: Players, gameID: string, Deck: Deck) {
     this.io = io
     this.players = players
     this.gameID = gameID
     this.deck = Deck
 
+    this.timeStart = 0
     this.sockets = Object.values(this.players)
     this.userIDs = Object.keys(this.players)
     this.rules = this.initRules()
@@ -56,6 +58,7 @@ class BasicGame {
         ready: false,
         score: 1,
         canPlay: true,
+        guessTimes: [],
         card: { state: 'faceDown', symbols: [] }
       }
     }

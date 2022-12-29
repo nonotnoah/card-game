@@ -13,6 +13,7 @@ export default interface GameState {
       ready: boolean
       score: number
       canPlay: boolean
+      guessTimes: number[]
       card: {
         state: string
         symbols: string[] | undefined // TOOD: add undef handle in clientgame

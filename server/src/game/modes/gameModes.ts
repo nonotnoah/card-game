@@ -28,13 +28,14 @@ export class TowerGame extends BasicGame {
     //try to start game every second
     const loop = setInterval(async () => {
       // console.log('checking for ready');
-      this.emitUpdateGameState('refreshing lobby')
+      // not needed unless reconnect logic is created
+      // this.emitUpdateGameState('refreshing lobby')
 
       const result = await this.checkReady()
       if (this.startAttempts > 600) { // game can wait for 10 min before closing
         clearInterval(loop)
         console.log('nobody was ready');
-        this.endGame('Game closed due to inactivity')
+        this.closeGame()
       }
       if (result) {
         clearInterval(loop)
@@ -64,7 +65,7 @@ export class TowerGame extends BasicGame {
   /**
    * @returns
    */
-  checkFilter() { 
+  checkFilter() {
     let filterList: boolean[] = []
     this.userIDs.map(id => {
       if (this.gameState.connectedPlayers[id].canPlay) {
@@ -102,6 +103,7 @@ export class TowerGame extends BasicGame {
         ready: true,
         score: 1,
         canPlay: true,
+        guessTimes: [],
         card: {
           state: 'faceDown',
           symbols: []
@@ -125,13 +127,20 @@ export class TowerGame extends BasicGame {
     // console.log('found match with mid card', match)
     const guessPayload = { userID: socket.userID, guess }
     if (match) {
-      this.emitToRoom('goodMatch', guessPayload)
+      const diff = Date.now() - this.timeStart
+      this.gameState.connectedPlayers[socket.userID].guessTimes.push(diff)
       this.gameState.connectedPlayers[socket.userID].score++
       this.gameState.connectedPlayers[socket.userID].card = this.gameState.middleCard
+      this.emitToRoom('goodMatch', guessPayload)
       // update client on gamestate
       if (this.nextTurn()) {
         this.emitUpdateGameState('next turn')
-      } else { } // endGame()?
+        setTimeout(() => {
+          this.timeStart = Date.now()
+        }, 1500) // this delay is how long spin animation takes
+      } else {
+        this.endGame()
+      } // endGame()?
     } else { // player will not be able to guess until next turn/update
       this.gameState.connectedPlayers[socket.userID].canPlay = false
       socket.emit('badMatch', guessPayload)
@@ -176,6 +185,9 @@ export class TowerGame extends BasicGame {
     })
     // trigger timer to reveal personal cards
     this.emitToRoom('reveal', this.gameState, 3)
+    setTimeout(() => {
+      this.timeStart = Date.now()
+    }, 3000)
   }
 
   /**
@@ -194,15 +206,79 @@ export class TowerGame extends BasicGame {
       this.gameState.cardsRemaining = this.deck.length()
       return true
     }
+    console.log("can't draw new card. ending game")
     return false
   }
 
-  endGame(reason: string) {
-    this.emitToRoom('endGame', reason)
+  endGame() {
+    let podium = {} as Podium
+    this.sockets.map(socket => {
+      let score = this.gameState.connectedPlayers[socket.userID].score
+      let guessTimes = this.gameState.connectedPlayers[socket.userID].guessTimes
+      let avgGuessTime = guessTimes.reduce((a, b) => (a + b) / guessTimes.length)
+      avgGuessTime = Math.floor(avgGuessTime) / 1000 // truc to 3 decimals
+      if (score > podium[1].score) {
+        // 2 becomes 3
+        podium[3].username = podium[2].username
+        podium[3].score = podium[2].score
+        podium[3].reactionTime = podium[2].reactionTime
+
+        // 1 becomes 2
+        podium[2].username = podium[1].username
+        podium[2].score = podium[1].score
+        podium[2].reactionTime = podium[1].reactionTime
+
+        // new becomes 1
+        podium[1].username = socket.username
+        podium[1].score = score
+        podium[1].reactionTime = avgGuessTime
+      } else if (score < podium[1].score && score > podium[2].score) {
+        // 2 becomes 3
+        podium[3].username = podium[2].username
+        podium[3].score = podium[2].score
+        podium[3].reactionTime = podium[2].reactionTime
+
+        // new becomes 2
+        podium[2].username = socket.username
+        podium[2].score = score
+        podium[2].reactionTime = avgGuessTime
+      } else if (score < podium[2].score && score > podium[3].score) {
+        // new beomes 3
+        podium[3].username = socket.username
+        podium[3].score = score
+        podium[3].reactionTime = avgGuessTime
+      }
+      this.gameState.connectedPlayers[socket.userID].ready = false
+      this.gameState.connectedPlayers[socket.userID].score = 1
+      this.gameState.connectedPlayers[socket.userID].card = { state: 'faceDown', symbols: [] }
+    })
+    this.gameState.isRunning = false
+    this.gameState.middleCard = { state: 'faceDown', symbols: [] }
+    this.emitUpdateGameState('game ended')
+    this.emitToRoom('podium', podium)
   }
+
+  closeGame() { }
 
   // Gamestate/Emitters ----------------------------
 
+}
+interface Podium {
+  1: {
+    username: string
+    score: number
+    reactionTime: number
+  }
+  2: {
+    username: string
+    score: number
+    reactionTime: number
+  }
+  3: {
+    username: string
+    score: number
+    reactionTime: number
+  }
 }
 
 export class WellGame extends BasicGame { }
