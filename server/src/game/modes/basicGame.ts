@@ -42,7 +42,7 @@ class BasicGame {
     this.startAttempts = 0
     this.gameState = { // init with default values
       isRunning: false,
-      cardsRemaining: this.deck.length(),
+      cardsRemaining: this.deck.length() + 1,
       middleCard: { state: 'faceUp', symbols: [] },
       connectedPlayers: {}
     }
@@ -189,6 +189,8 @@ class BasicGame {
     console.log('RECONNECTING', socket.username)
     socket.emit('reconnect', this.gameState)
     this.players[socket.userID] = socket // update with fresh socket
+    this.sockets = Object.values(this.players)
+    this.userIDs = Object.keys(this.players)
     this.gameState.connectedPlayers[socket.userID].connected = true
     this.removeListenerFromAll(this.rules) // remove listeners
     this.addListenersToAll(this.rules) // add listeners
@@ -206,6 +208,8 @@ class BasicGame {
     // TODO: have this trigger a "vote to continue without player" modal
     this.gameState.connectedPlayers[socket.userID].connected = false
     delete this.players[socket.userID]
+    this.sockets = Object.values(this.players)
+    this.userIDs = Object.keys(this.players)
     this.emitUpdateGameState('player leave')
   }
 
@@ -227,6 +231,8 @@ class BasicGame {
       } else { // if foreign userIDs are detected?
         diffList.map(userID => {
           delete this.players[userID]
+          this.sockets = Object.values(this.players)
+          this.userIDs = Object.keys(this.players)
         })
         this.emitToRoom('update', 'playerleave', this.gameState)
       }

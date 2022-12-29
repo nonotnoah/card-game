@@ -1,15 +1,21 @@
+import { useRef, useState } from "react"
+
 interface CardObj {
   state: string,
   symbols: string[] | undefined
 }
 interface CardProps {
+  canPlay: boolean
   card: CardObj
   match: { userID: string, guess: string }
   onClick: (emoji: string) => void
+  countDown: boolean
 }
 
-export default function MidCard({ card, onClick, match }: CardProps) {
+export default function MidCard({ canPlay, card, onClick, match, countDown }: CardProps) {
   // const faceDown = ['🚫', '🚫', '🚫', '🚫', '🚫', '🚫', '🚫', '🚫']
+  const [symbolClass, setSymbolClass] = useState('')
+  const symbClassSet = useRef(false)
   const faceDown: string[] = []
 
   let key = 0
@@ -18,16 +24,79 @@ export default function MidCard({ card, onClick, match }: CardProps) {
     return key.toString()
   }
 
-  const handleClick = (emoji: string) => {
-    onClick(emoji)
+  // check every render if player can play
+  const checkPlayable = () => {
+    if (!canPlay && !symbClassSet.current) {
+      setSymbolClass('opacity-50')
+      symbClassSet.current = true
+    } else if (canPlay && symbClassSet.current) {
+      symbClassSet.current = false
+    }
   }
+
+  const handleClick = (emoji: string) => {
+    if (canPlay) {
+      onClick(emoji)
+    }
+  }
+  
+  checkPlayable()
+
+  // animations 
+  const [midClass, setMidClass] = useState('mid-card rotate')
+  const startFadeIn = useRef(false)
+  const slideInOut = () => {
+    if (match.guess != '') {
+      setTimeout(() => {
+        setMidClass('mid-card slide-out')
+      }, 1000)
+      setTimeout(() => {
+        setMidClass('mid-card slide-in')
+      }, 1750)
+      setTimeout(() => {
+        setMidClass('mid-card rotate')
+      }, 2500)
+    }
+  }
+
+  const spinIn = () => {
+    setMidClass('mid-card fadein')
+    setTimeout(() => {
+      setMidClass('mid-card rotate')
+      startFadeIn.current = false
+    }, 0)
+  }
+
+  const spinOut = () => {
+    console.log('spun middle card')
+    setTimeout(() => {
+      setMidClass('mid-card spinout')
+    }, 1000)
+    setTimeout(() => {
+      setMidClass('mid-card rotate')
+    }, 1500)
+  }
+
+  if (countDown && !startFadeIn.current) {
+    startFadeIn.current = true
+    spinIn()
+  }
+  if (match.guess != '') {
+    spinOut()
+  }
+
   return (
     <div className="mid-card-wrapper">
-      <div className="mid-card">
+      <div className={midClass}>
         {card.state == 'faceUp' ? (
           card.symbols?.map(emoji => (
             <div className="symbol-wrapper">
-              <span className={match.guess == emoji ? 'flash-correct' : ''} onClick={() => handleClick(emoji)} key={midKey()}>{emoji}</span>
+              <span
+                className={`
+                  ${match.guess == emoji ? 'flash-correct' : ''}
+                  ${symbolClass}
+                `}
+                onClick={() => handleClick(emoji)} key={midKey()}>{emoji}</span>
             </div>
           ))
         ) : (

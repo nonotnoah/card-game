@@ -27,7 +27,7 @@ export default function TowerGame({ socket, initEvent }: SocketProps) {
   const [ready, setReady] = useState(false)
   const [countingDown, setCountingDown] = useState(false)
   const [count, setCount] = useState(0)
-  const [match, setMatch] = useState({ userID: '', guess: ''})
+  const [match, setMatch] = useState({ userID: '', guess: '' })
   const [gameState, setGameState] = useState<GameState>({
     isRunning: false,
     cardsRemaining: 100,
@@ -109,11 +109,19 @@ export default function TowerGame({ socket, initEvent }: SocketProps) {
     }
   }
 
+  const asyncWait = (func: Function, args: any, time: number) => {
+    setTimeout(() => {
+      func(args)
+    }, time)
+  }
+
   useEffect(() => {
     socket.on('update', (reason, updatedGameState: GameState) => {
-      setGameState(updatedGameState)
       if (reason == 'next turn') {
-        setMatch({userID: '', guess: ''})
+        asyncWait(setGameState, updatedGameState, 1250)
+        asyncWait(setMatch, { userID: '', guess: '' }, 500)
+      } else {
+        setGameState(updatedGameState)
       }
       console.log('updated gameState', updatedGameState, 'because', reason)
     })
@@ -159,7 +167,7 @@ export default function TowerGame({ socket, initEvent }: SocketProps) {
       // do other stuff
     });
 
-    socket.on('goodMatch', (correctPayload: { userID: string, guess: string}) => {
+    socket.on('goodMatch', (correctPayload: { userID: string, guess: string }) => {
       setMatch(correctPayload)
     })
 
@@ -198,22 +206,34 @@ export default function TowerGame({ socket, initEvent }: SocketProps) {
   }
   return (
     <div className="game-wrapper">
-      <button onClick={() => handleClick()}>gamestate</button>
+      {/* <button onClick={() => handleClick()}>gamestate</button> */}
       {!gameState.isRunning && (
         ready ? (
-          <div className='ready' > Waiting for players...</div>
+          <div className='center' > Waiting for players...</div>
         ) : (
-          <button className="ready" onClick={() => handleReady()}>Ready?</button>
+          <button className="center" onClick={() => handleReady()}>Ready?</button>
         )
       )}
       {countingDown && (
         <div className='countdown ready'>{count}</div>
       )}
-      <MidCard match={match} onClick={(emoji) => handleGuess(emoji)} card={gameState.middleCard}></MidCard>
       {!gameState.connectedPlayers[socket.userID].canPlay && (
         <div className='filter'>Wrong guess!</div>
       )}
-      <MyEmojis match={match} card={gameState.connectedPlayers[socket.userID].card} myUserID={socket.userID}></MyEmojis>
+      {(gameState.connectedPlayers[socket.userID].canPlay && gameState.isRunning) && (
+        <div className="center remaining">{gameState.cardsRemaining}</div>
+      )}
+      <MidCard
+        canPlay={gameState.connectedPlayers[socket.userID].canPlay}
+        countDown={countingDown}
+        match={match} onClick={(emoji) => handleGuess(emoji)}
+        card={gameState.middleCard}
+      ></MidCard>
+      <MyEmojis
+        match={match}
+        card={gameState.connectedPlayers[socket.userID].card}
+        myUserID={socket.userID}
+      ></MyEmojis>
       <Players match={match} connectedPlayers={gameState.connectedPlayers} myUserID={socket.userID}></Players>
     </div >
   )

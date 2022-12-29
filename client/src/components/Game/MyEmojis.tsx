@@ -1,3 +1,5 @@
+import { useState } from "react"
+
 interface CardObj {
   state: string,
   symbols: string[] | undefined
@@ -11,13 +13,27 @@ interface CardProps {
 export default function MyEmojis({ card, match, myUserID }: CardProps) {
   // const faceDown = ['🚫', '🚫', '🚫', '🚫', '🚫', '🚫', '🚫', '🚫']
   const faceDown: string[] = []
+
+  const [myEmojiClass, setMyEmojiClass] = useState('my-emojis')
+  const slideInOut = () => {
+    setTimeout(() => {
+      setMyEmojiClass('slide-down my-emojis')
+    }, 1000)
+    setTimeout(() => {
+      setMyEmojiClass('slide-up my-emojis')
+    }, 1250)
+  }
+  if (match.guess != '' && match.userID == myUserID) {
+    slideInOut()
+  }
+
   return (
     <div className="my-emoji-wrapper">
-      <div className="my-emojis">
+      <div className={myEmojiClass}>
         {card.state == 'faceUp' ? (
           card.symbols?.map(emoji => (
             <div className="symbol-wrapper">
-              <span className={match.userID == myUserID ? match.guess == emoji ? 'flash-correct' : 'flash-wrong' : ''}>{emoji}</span>
+              <span className={match.userID == myUserID ? match.guess == emoji ? 'flash-correct' : '' : ''}>{emoji}</span>
             </div>
           ))
         ) : (

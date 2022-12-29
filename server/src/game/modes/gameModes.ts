@@ -64,7 +64,26 @@ export class TowerGame extends BasicGame {
   /**
    * @returns
    */
-  // method() { }
+  checkFilter() { 
+    let filterList: boolean[] = []
+    this.userIDs.map(id => {
+      if (this.gameState.connectedPlayers[id].canPlay) {
+        filterList.push(true)
+      } else {
+        filterList.push(false)
+      }
+    })
+    const clearFilter = filterList.some(val => {
+      return val == true
+    })
+    if (!clearFilter) {
+      this.userIDs.map(id => {
+        this.gameState.connectedPlayers[id].canPlay = true
+      })
+      this.emitUpdateGameState('no one guessed right')
+      console.log('no one guessed right! resetting filters')
+    }
+  }
 
   // tools -----------------------------------------
 
@@ -101,12 +120,12 @@ export class TowerGame extends BasicGame {
   }
 
   guess = (guess: any, socket: MySocket) => {
-    console.log('guessed', guess)
+    // console.log('guessed', guess)
     const match = this.deck.checkGuess(guess, this.gameState.connectedPlayers[socket.userID].card)
-    console.log('found match with mid card', match)
+    // console.log('found match with mid card', match)
+    const guessPayload = { userID: socket.userID, guess }
     if (match) {
-      const correctPayload = { userID: socket.userID, guess }
-      this.emitToRoom('goodMatch', correctPayload)
+      this.emitToRoom('goodMatch', guessPayload)
       this.gameState.connectedPlayers[socket.userID].score++
       this.gameState.connectedPlayers[socket.userID].card = this.gameState.middleCard
       // update client on gamestate
@@ -115,10 +134,11 @@ export class TowerGame extends BasicGame {
       } else { } // endGame()?
     } else { // player will not be able to guess until next turn/update
       this.gameState.connectedPlayers[socket.userID].canPlay = false
+      socket.emit('badMatch', guessPayload)
       this.emitUpdateGameState('bad match')
     }
-    // this.emitToRoom('badMatch', socket.userID)
-    // socket.emit('badMatch')
+    // expensive way to check if everyone guessed wrong
+    this.checkFilter()
   }
 
   vote(type: any, socket: MySocket) {

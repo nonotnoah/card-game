@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { getEmoji } from '../../utils/animalEmojis'
 interface CardObj {
   state: string,
@@ -26,7 +26,6 @@ export default function Players({ connectedPlayers, match, myUserID }: PlayerPro
   // const faceDown = ['🚫', '🚫', '🚫', '🚫', '🚫', '🚫', '🚫', '🚫']
   const faceDown: string[] = ['❓']
 
-
   // }
   return (
     // <div className={`player-wrapper-${numPlayers}`}>
@@ -43,12 +42,17 @@ export default function Players({ connectedPlayers, match, myUserID }: PlayerPro
                 ${connectedPlayers[userID].isHost ? '(host)' : ''}
                 ${userID == myUserID ? '(you)' : ''}
                 ${connectedPlayers[userID].ready ? '✅' : ''}
+                ${connectedPlayers[userID].score}
               `}
               </div>
               <div className="player-emojis">
                 {connectedPlayers[userID].card.state == 'faceUp' ? (
                   connectedPlayers[userID].card.symbols?.map(emoji => (
-                    <span className={userID == match.userID ? emoji == match.guess ? 'flash-correct' : '' : ''}>{emoji}</span>
+                    <span className={`
+                    ${userID == match.userID ? emoji == match.guess ? 'flash-correct' : '' : ''}
+                    `}>
+                      {emoji}
+                    </span>
                   ))
                 ) : (
                   faceDown.map(emoji => (
@@ -72,12 +76,17 @@ export default function Players({ connectedPlayers, match, myUserID }: PlayerPro
                 ${connectedPlayers[userID].isHost ? '(host)' : ''}
                 ${userID == myUserID ? '(you)' : ''}
                 ${connectedPlayers[userID].ready ? '✅' : ''}
+                ${connectedPlayers[userID].score}
               `}
               </div>
               <div className="player-emojis">
                 {connectedPlayers[userID].card.state == 'faceUp' ? (
                   connectedPlayers[userID].card.symbols?.map(emoji => (
-                    <span>{emoji}</span>
+                    <span className={`
+                    ${userID == match.userID ? emoji == match.guess ? 'flash-correct' : '' : ''}
+                    `}>
+                      {emoji}
+                    </span>
                   ))
                 ) : (
                   faceDown.map(emoji => (
