@@ -81,7 +81,10 @@ export class TowerGame extends BasicGame {
       this.userIDs.map(id => {
         this.gameState.connectedPlayers[id].canPlay = true
       })
-      this.emitUpdateGameState('no one guessed right')
+      setTimeout(() => {
+        this.emitToRoom('reveal', this.gameState, 3)
+      }, 1000) // delay because filter was rendering late
+      // this.emitUpdateGameState('no one guessed right')
       console.log('no one guessed right! resetting filters')
     }
   }
@@ -122,6 +125,7 @@ export class TowerGame extends BasicGame {
   }
 
   guess = (guess: any, socket: MySocket) => {
+
     // console.log('guessed', guess)
     const match = this.deck.checkGuess(guess, this.gameState.connectedPlayers[socket.userID].card)
     // console.log('found match with mid card', match)
@@ -211,12 +215,35 @@ export class TowerGame extends BasicGame {
   }
 
   endGame() {
-    let podium = {} as Podium
+    let podium = {
+      1: {
+        userID: '',
+        username: '',
+        score: 0,
+        reactionTime: 0,
+      },
+      2: {
+        username: '',
+        score: 0,
+        reactionTime: 0,
+      },
+      3: {
+        username: '',
+        score: 0,
+        reactionTime: 0,
+      }
+    } as Podium
     this.sockets.map(socket => {
       let score = this.gameState.connectedPlayers[socket.userID].score
       let guessTimes = this.gameState.connectedPlayers[socket.userID].guessTimes
-      let avgGuessTime = guessTimes.reduce((a, b) => (a + b) / guessTimes.length)
-      avgGuessTime = Math.floor(avgGuessTime) / 1000 // truc to 3 decimals
+      let avgGuessTime
+      if (guessTimes.length > 1) {
+        avgGuessTime = guessTimes.reduce((a, b) => (a + b) / guessTimes.length)
+        avgGuessTime = Math.floor(avgGuessTime) / 1000 // truc to 3 decimals
+      } else {
+        avgGuessTime = 100
+      }
+      // I hate this so much why did I do this
       if (score > podium[1].score) {
         // 2 becomes 3
         podium[3].username = podium[2].username
@@ -229,9 +256,28 @@ export class TowerGame extends BasicGame {
         podium[2].reactionTime = podium[1].reactionTime
 
         // new becomes 1
+        podium[1].userID = socket.userID
         podium[1].username = socket.username
         podium[1].score = score
         podium[1].reactionTime = avgGuessTime
+      } else if (score == podium[1].score) {
+        if (podium[1].reactionTime > avgGuessTime) {
+          // 2 becomes 3
+          podium[3].username = podium[2].username
+          podium[3].score = podium[2].score
+          podium[3].reactionTime = podium[2].reactionTime
+
+          // 1 becomes 2
+          podium[2].username = podium[1].username
+          podium[2].score = podium[1].score
+          podium[2].reactionTime = podium[1].reactionTime
+
+          // new becomes 1
+          podium[1].userID = socket.userID
+          podium[1].username = socket.username
+          podium[1].score = score
+          podium[1].reactionTime = avgGuessTime
+        }
       } else if (score < podium[1].score && score > podium[2].score) {
         // 2 becomes 3
         podium[3].username = podium[2].username
@@ -242,16 +288,38 @@ export class TowerGame extends BasicGame {
         podium[2].username = socket.username
         podium[2].score = score
         podium[2].reactionTime = avgGuessTime
+      } else if (score == podium[2].score) {
+        if (podium[2].reactionTime > avgGuessTime) {
+          // 2 becomes 3
+          podium[3].username = podium[2].username
+          podium[3].score = podium[2].score
+          podium[3].reactionTime = podium[2].reactionTime
+
+          // new becomes 2
+          podium[2].username = socket.username
+          podium[2].score = score
+          podium[2].reactionTime = avgGuessTime
+        }
       } else if (score < podium[2].score && score > podium[3].score) {
         // new beomes 3
         podium[3].username = socket.username
         podium[3].score = score
         podium[3].reactionTime = avgGuessTime
+      } else if (score == podium[2].score) {
+        if (podium[3].reactionTime > avgGuessTime) {
+          // new beomes 3
+          podium[3].username = socket.username
+          podium[3].score = score
+          podium[3].reactionTime = avgGuessTime
+        }
       }
+
       this.gameState.connectedPlayers[socket.userID].ready = false
       this.gameState.connectedPlayers[socket.userID].score = 1
       this.gameState.connectedPlayers[socket.userID].card = { state: 'faceDown', symbols: [] }
     })
+    this.gameState.winner = podium[1].userID
+    console.log('WINNER:', this.gameState.winner)
     this.gameState.isRunning = false
     this.gameState.middleCard = { state: 'faceDown', symbols: [] }
     this.emitUpdateGameState('game ended')
@@ -265,6 +333,7 @@ export class TowerGame extends BasicGame {
 }
 interface Podium {
   1: {
+    userID: string
     username: string
     score: number
     reactionTime: number

@@ -1,0 +1,46 @@
+div {
+  // border: 1px solid red;
+}
+.podium-wrapper {
+  position: relative;
+  width: 315px;
+  height: 350px;
+
+  display: flex;
+  flex-flow: column;
+  justify-content: center;
+  align-items: center;
+}
+.win-text {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 13.2%; // same size as other home button
+  font-size: x-large;
+
+  display: flex;
+  flex-flow: column;
+  justify-content: center;
+  align-items: center;
+}
+.close {
+  position: absolute;
+  bottom: 0;
+  width: 80%;
+  height: 13.2%; // same size as other home button
+}
+.places-wrapper {
+  width: 100%;
+  // height: 100%;
+  display: flex;
+  flex-flow: column;
+}
+
+.half-wrapper{
+  padding-top: 5%;
+  padding-bottom: 5%;
+  display: flex;
+}
+.second-place, .third-place {
+  width: 50%;
+}

@@ -43,6 +43,7 @@ class BasicGame {
     this.readyList = []
     this.startAttempts = 0
     this.gameState = { // init with default values
+      winner: '',
       isRunning: false,
       cardsRemaining: this.deck.length() + 1,
       middleCard: { state: 'faceUp', symbols: [] },

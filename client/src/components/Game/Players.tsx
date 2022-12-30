@@ -39,7 +39,7 @@ export default function Players({ connectedPlayers, match, myUserID }: PlayerPro
                 {`
                 ${getEmoji(connectedPlayers[userID].username)} 
                 ${connectedPlayers[userID].username} 
-                ${connectedPlayers[userID].isHost ? '(host)' : ''}
+                ${connectedPlayers[userID].isHost ? '' : ''}
                 ${userID == myUserID ? '(you)' : ''}
                 ${connectedPlayers[userID].ready ? '✅' : ''}
                 ${connectedPlayers[userID].score}
@@ -73,7 +73,7 @@ export default function Players({ connectedPlayers, match, myUserID }: PlayerPro
                 {`
                 ${getEmoji(connectedPlayers[userID].username)} 
                 ${connectedPlayers[userID].username} 
-                ${connectedPlayers[userID].isHost ? '(host)' : ''}
+                ${connectedPlayers[userID].isHost ? '' : ''}
                 ${userID == myUserID ? '(you)' : ''}
                 ${connectedPlayers[userID].ready ? '✅' : ''}
                 ${connectedPlayers[userID].score}

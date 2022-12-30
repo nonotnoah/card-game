@@ -50,7 +50,7 @@ export default class Lobby {
     // add lobby listeners
     this.addAnonListenerTo(socket, 'start', this.start)
     this.addAnonListenerTo(socket, 'disconnect', this.disconnect)
-    this.addAnonListenerTo(socket, 'end', this.endGame)
+    this.addAnonListenerTo(socket, 'closeGame', this.closeGame)
     this.addAnonListenerTo(socket, 'sizeChange', this.sizeChange)
     this.addAnonListenerTo(socket, 'needSizeChange', this.needSizeChange)
     this.addAnonListenerTo(socket, 'needPlayers', this.needPlayers)
@@ -187,8 +187,12 @@ export default class Lobby {
     socket.emit('sizeChange', this.currentSize)
   }
 
-  endGame = (socket: MySocket) => {
+  closeGame = (socket: MySocket) => {
+    if (this.currentGame){
+      this.connectedPlayers[this.currentGame.gameState.winner].wins ++
+    }
     this.gameStarted = false
+    this.currentGame = undefined
   }
 
   needPlayers = (socket: MySocket) => {

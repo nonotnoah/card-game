@@ -79,6 +79,7 @@ export default function HostLobbyRoom({ socket, onCancel }: LobbyProps) {
       setPodium(podium)
       setShowPodium(true)
       setWaitingForPlayers(true)
+      socket.emit('closeGame')
     })
 
     return (): void => {
@@ -93,6 +94,7 @@ export default function HostLobbyRoom({ socket, onCancel }: LobbyProps) {
 
   const handleClose = () => {
     setShowPodium(false)
+    setWaitingForPlayers(true)
   }
 
   return (

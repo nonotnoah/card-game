@@ -41,6 +41,7 @@ io.use((socket: MySocket, next) => {
       socket.username = serverSession.username
       socket.gameID = socket.handshake.auth.gameID
       socket.isHost = socket.handshake.auth.isHost
+      socket.wins = 0
       return next()
     }
   }
@@ -52,6 +53,7 @@ io.use((socket: MySocket, next) => {
   socket.username = username
   socket.gameID = gameID
   socket.isHost = isHost
+  socket.wins = 0
   next()
 })
 

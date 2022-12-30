@@ -2,3 +2,17 @@ server side card draw:
 - card is functional component
 - draw is automatic
 - after match, every client sends 
+
+needed:
+podium styling
+test deck for ^
+roomID & lobby styling
+
+wanted:
+deck size styling & testing
+custom card count
+win count
+
+longer term:
+live game reconnect
+refactor shuffles and calculations to client

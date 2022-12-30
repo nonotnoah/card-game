@@ -38,6 +38,7 @@ export default function MidCard({ hasGuessed, canPlay, card, onClick, match, cou
   // checkPlayable() // see if filter works
 
   const handleClick = (emoji: string) => {
+    console.log(canPlay, hasGuessed)
     if (canPlay && !hasGuessed) {
       onClick(emoji)
     }

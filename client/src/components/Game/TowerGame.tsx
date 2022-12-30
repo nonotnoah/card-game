@@ -29,6 +29,7 @@ export default function TowerGame({ socket, initEvent }: SocketProps) {
   const [match, setMatch] = useState({ userID: '', guess: '' })
   const [hasGuessed, setHasGuessed] = useState(false)
   const [gameState, setGameState] = useState<GameState>({
+    winner: '',
     isRunning: false,
     cardsRemaining: 100,
     middleCard: {
@@ -49,53 +50,6 @@ export default function TowerGame({ socket, initEvent }: SocketProps) {
           symbols: []
         }
       },
-      // {
-      // // 'asdf': {
-      // //   isHost: false,
-      // //   username: 'Dancer',
-      // //   score: 0,
-      // //   card: {
-      // //     state: 'faceUp',
-      // //     symbols: ['😎', '😎', '😎', '😎', '😎', '😎', '😎', '😎']
-      // //   }
-      // // },
-      // // 'adf': {
-      // //   isHost: false,
-      // //   username: 'Prancer',
-      // //   score: 0,
-      // //   card: {
-      // //     state: 'faceUp',
-      // //     symbols: ['😎', '😎', '😎', '😎', '😎', '😎', '😎', '😎']
-      // //   }
-      // // },
-      // // 'asf': {
-      // //   isHost: false,
-      // //   username: 'Vixen',
-      // //   score: 0,
-      // //   card: {
-      // //     state: 'faceUp',
-      // //     symbols: ['😎', '😎', '😎', '😎', '😎', '😎', '😎', '😎']
-      // //   }
-      // // },
-      // // 'asd': {
-      // //   isHost: false,
-      // //   username: 'Comet',
-      // //   score: 0,
-      // //   card: {
-      // //     state: 'faceUp',
-      // //     symbols: ['😎', '😎', '😎', '😎', '😎', '😎', '😎', '😎']
-      // //   }
-      // // },
-      // // 'sdf': {
-      // //   isHost: false,
-      // //   username: 'Cupid',
-      // //   score: 0,
-      // //   card: {
-      // //     state: 'faceUp',
-      // //     symbols: ['😎', '😎', '😎', '😎', '😎', '😎', '😎', '😎']
-      // //   }
-      // // }
-      // }
     }
   }) // maybe this is a useref so you don't have to update the whole dom - test the performance of this
 
@@ -121,9 +75,12 @@ export default function TowerGame({ socket, initEvent }: SocketProps) {
   useEffect(() => {
     socket.on('update', (reason, updatedGameState: GameState) => {
       if (reason == 'next turn') {
+        setHasGuessed(false)
         asyncWait(setGameState, updatedGameState, 1250)
         asyncWait(setMatch, { userID: '', guess: '' }, 500)
-        setHasGuessed(true)
+        console.log(hasGuessed)
+      } else if (reason == 'no one guessed right') {
+        setHasGuessed(false)
       } else {
         setGameState(updatedGameState)
       }
@@ -134,25 +91,8 @@ export default function TowerGame({ socket, initEvent }: SocketProps) {
       setCountingDown(true)
       setCount(seconds)
       setTimeout(() => {
-        setGameState(updatedGameState
-          //   {
-          // //   ...gameState,
-          // //   middleCard: {
-          // //     ...gameState.middleCard,
-          // //     state: 'faceUp'
-          // //   },
-          // //   connectedPlayers: {
-          // //     [socket.userID]: {
-          // //       ...gameState.connectedPlayers[socket.userID],
-          // //       card: {
-          // //         ...gameState.connectedPlayers[socket.userID].card,
-          // //         state: 'faceUp'
-          // //       }
-          // //     }
-          // //   }
-          // // })
-          //   }
-        )
+        setHasGuessed(false)
+        setGameState(updatedGameState)
       }, seconds * 1000)
     })
 
@@ -202,7 +142,7 @@ export default function TowerGame({ socket, initEvent }: SocketProps) {
   const handleGuess = (emoji: string) => {
     setHasGuessed(true)
     console.log('clicked', emoji)
-    socket.emit('guess', emoji)
+    socket.emit('guess', emoji) // TODO: send timestamp
   }
 
   // testing
@@ -220,12 +160,12 @@ export default function TowerGame({ socket, initEvent }: SocketProps) {
         )
       )}
       {countingDown && (
-        <div className='countdown ready'>{count}</div>
+        <div className='countdown center'>{count}</div>
       )}
-      {!currentPlayer.canPlay && (
+      {(!currentPlayer.canPlay && !countingDown) && (
         <div className='filter'>Wrong guess!</div>
       )}
-      {(currentPlayer.canPlay && gameState.isRunning) && (
+      {(currentPlayer.canPlay && gameState.isRunning && !countingDown) && (
         <div className="center remaining">{gameState.cardsRemaining}</div>
       )}
       <MidCard

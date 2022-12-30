@@ -19,7 +19,8 @@ class Deck {
     this.nValue = n
     this.cards = this.makeDeck(n, shuffleArray(imgs))
     // make a deep copy of the deck
-    this.cardsCopy = shuffleDeck([...this.cards])
+    // this.cardsCopy = shuffleDeck([...this.cards])
+    this.cardsCopy = shuffleDeck([...this.cards]).slice(52)
     // this.test()
   }
 
@@ -123,7 +124,10 @@ class Deck {
   /** @returns cardObj.symbols as undefined if there are no cards left to draw
    */
   public drawCard(state: string) {
-    const card = this.cardsCopy.shift()
+    let card = this.cardsCopy.shift()
+    if (card) {
+      card = shuffleArray(card)
+    }
     const cardObj = { state: state, symbols: card }
     return cardObj
   }

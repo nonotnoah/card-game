@@ -1,4 +1,5 @@
 export default interface GameState {
+  winner: string
   isRunning: boolean
   cardsRemaining: number
   middleCard: {

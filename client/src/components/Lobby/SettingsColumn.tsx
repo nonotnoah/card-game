@@ -21,7 +21,7 @@ export default function SettingsColumn({ size, onSizeChange, onStart }: Settings
   const sizeDescription = useRef(size.description)
 
   const handleClick = (sign: string) => {
-    const sizeNumbers = [4, 8, 13]
+    const sizeNumbers = [4, 8, 12]
     const sizeNames = ['Small', 'Normal', 'Large']
     const sizeDescriptions = ['Faster pace', 'The standard experience', 'More difficult']
     const currentNumber = sizeNumbers.indexOf(numberOfSymbols.current)
