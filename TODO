@@ -1,12 +1,4 @@
-server side card draw:
-- card is functional component
-- draw is automatic
-- after match, every client sends 
-
-needed:
-podium styling
-test deck for ^
-roomID & lobby styling
+prevent start button from being fired >1 time
 
 wanted:
 deck size styling & testing
