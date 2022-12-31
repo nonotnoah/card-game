@@ -3,17 +3,18 @@ div {
 }
 .podium-wrapper {
   position: relative;
-  width: 315px;
+  // transform: translate(-50%, -50%);
+  width: 700px;
   height: 350px;
 
   display: flex;
   flex-flow: column;
-  justify-content: center;
+  // justify-content: center;
   align-items: center;
 }
 .win-text {
   position: absolute;
-  top: 0;
+  top: -26.4%;
   width: 100%;
   height: 13.2%; // same size as other home button
   font-size: x-large;
@@ -26,19 +27,46 @@ div {
 .close {
   position: absolute;
   bottom: 0;
-  width: 80%;
+  width: 252px;
   height: 13.2%; // same size as other home button
 }
 .places-wrapper {
   width: 100%;
   // height: 100%;
   display: flex;
+  justify-content: center;
   flex-flow: column;
+}
+ul.place-list {
+  // columns: 2;
+  width: 100%;
+  list-style: none;
+}
+.list {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+.list-left {
+  display: inline-block;
+  width: 50%;
+  // text-align: end;
+}
+.list-right {
+  display: inline-block;
+  width: 50%;
+  text-align: left;
+}
+.first-place {
+  // width: 50%;
+  .list-left, .list-right {
+    width: 25%;
+  }
 }
 
 .half-wrapper{
-  padding-top: 5%;
-  padding-bottom: 5%;
+  // padding-top: 1%;
+  // padding-bottom: 5%;
   display: flex;
 }
 .second-place, .third-place {

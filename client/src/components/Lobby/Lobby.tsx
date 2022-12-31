@@ -1,7 +1,6 @@
 // TODO: make connectedPlayers a callable API that returns promises
 import { useEffect, useRef, useState } from "react"
 import { Socket } from "socket.io-client"
-import '../../styles/Lobby.scss'
 import { animalEmojis, getEmoji } from "../../utils/animalEmojis"
 
 interface MySocket extends Socket {

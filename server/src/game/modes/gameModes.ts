@@ -315,7 +315,7 @@ export class TowerGame extends BasicGame {
       }
 
       this.gameState.connectedPlayers[socket.userID].ready = false
-      this.gameState.connectedPlayers[socket.userID].score = 1
+      this.gameState.connectedPlayers[socket.userID].score = 0
       this.gameState.connectedPlayers[socket.userID].card = { state: 'faceDown', symbols: [] }
     })
     this.gameState.winner = podium[1].userID

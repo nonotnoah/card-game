@@ -57,7 +57,7 @@ class BasicGame {
         isHost: MySocket.isHost,
         username: MySocket.username,
         ready: false,
-        score: 1,
+        score: 0,
         canPlay: true,
         guessTimes: [],
         card: { state: 'faceDown', symbols: [] }

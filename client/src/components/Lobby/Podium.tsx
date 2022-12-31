@@ -37,44 +37,56 @@ export default function Podium({ onClose, podium }: PodiumProps) {
         <div className="places-wrapper">
           {podium[1].username && (
             <div className="first-place">
-              <div className="place">1st 🥇</div>
               <div className="podium-username">
                 {`${getEmoji(podium[1].username)} ${podium[1].username}`}
               </div>
-              <div className="podium-score">
-                Score: {podium[1].score}
-              </div>
-              <div className="podium-time">
-                Avg guess: {podium[1].reactionTime == 100 ? 'N/A' : podium[1].reactionTime} seconds
-              </div>
+              <div className="place">1st 🥇</div>
+              <ul className='place-list'>
+                <li className="score list">
+                  <div className="podium-score list-left">Score:</div>
+                  <div className="list-right">{podium[1].score} matches</div>
+                </li>
+                <li className="time list">
+                  <div className="podium-time list-left"> Avg guess: </div>
+                  <div className="list-right">{podium[1].reactionTime == 100 ? 'N/A' : podium[1].reactionTime} seconds</div>
+                </li>
+              </ul>
             </div>
           )}
           <div className="half-wrapper">
             {podium[2].username && (
               <div className="second-place">
-              <div className="place">2nd 🥈</div>
                 <div className="podium-username">
                   {`${getEmoji(podium[2].username)} ${podium[2].username}`}
-                </div>
-                <div className="podium-score">
-                  Score: {podium[2].score}
-                </div>
-                <div className="podium-time">
-                  {podium[2].reactionTime == 100 ? 'N/A' : podium[2].reactionTime} seconds
+                  <div className="place">2nd 🥈</div>
+                  <ul className='place-list'>
+                    <li className="score list">
+                      <div className="podium-score list-left">Score:</div>
+                      <div className="list-right">{podium[2].score} matches</div>
+                    </li>
+                    <li className="time list">
+                      <div className="podium-time list-left"> Avg guess: </div>
+                      <div className="list-right">{podium[2].reactionTime == 100 ? 'N/A' : podium[2].reactionTime} seconds</div>
+                    </li>
+                  </ul>
                 </div>
               </div>
             )}
             {podium[3].username && (
               <div className="third-place">
-              <div className="place">3rd 🥉</div>
                 <div className="podium-username">
                   {`${getEmoji(podium[3].username)} ${podium[3].username}`}
-                </div>
-                <div className="podium-score">
-                  Score: {podium[3].score}
-                </div>
-                <div className="podium-time">
-                  {podium[3].reactionTime == 100 ? 'N/A' : podium[3].reactionTime} seconds
+                  <div className="place">3rd 🥉</div>
+                  <ul className='place-list'>
+                    <li className="score list">
+                      <div className="podium-score list-left">Score:</div>
+                      <div className="list-right">{podium[3].score} matches</div>
+                    </li>
+                    <li className="time list">
+                      <div className="podium-time list-left"> Avg guess: </div>
+                      <div className="list-right">{podium[3].reactionTime == 100 ? 'N/A' : podium[3].reactionTime} seconds</div>
+                    </li>
+                  </ul>
                 </div>
               </div>
             )}

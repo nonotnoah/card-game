@@ -42,7 +42,7 @@ export default function TowerGame({ socket, initEvent }: SocketProps) {
         isHost: socket.isHost,
         username: socket.username,
         ready: false,
-        score: 1,
+        score: 0,
         canPlay: true,
         guessTimes: [],
         card: {

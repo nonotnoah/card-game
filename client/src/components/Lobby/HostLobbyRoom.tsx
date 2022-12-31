@@ -16,6 +16,7 @@ interface MySocket extends Socket {
 interface LobbyProps {
   children: never[] // ???????
   socket: MySocket
+  gameID: string
   onCancel: () => void
 }
 interface SizeProps {
@@ -42,7 +43,7 @@ interface Podium {
 }
 
 
-export default function HostLobbyRoom({ socket, onCancel }: LobbyProps) {
+export default function HostLobbyRoom({ socket, gameID, onCancel }: LobbyProps) {
   const [showPodium, setShowPodium] = useState(false)
   const [podium, setPodium] = useState({} as Podium)
   const [waitingForPlayers, setWaitingForPlayers] = useState(true);
@@ -97,6 +98,18 @@ export default function HostLobbyRoom({ socket, onCancel }: LobbyProps) {
     setWaitingForPlayers(true)
   }
 
+  const [code, setCode] = useState('Room Code')
+  const handleOffHover = () => {
+    setCode('Room Code')
+  }
+  const handleOnHover = () => {
+    setCode('Click To Copy')
+  }
+  const handleCopy = () => {
+    navigator.clipboard.writeText(gameID)
+    setCode('Copied!')
+  }
+
   return (
     <div className="wrapper">
       {showPodium ? (
@@ -105,17 +118,29 @@ export default function HostLobbyRoom({ socket, onCancel }: LobbyProps) {
           podium={podium}
         />
       ) : waitingForPlayers ? (
-        <div className="box">
-          <PlayersColumn
-            socket={socket}
-            onUsernameSubmit={(username) => handleUsernameSubmit(username)}
-            onCancel={() => handleCancel()}
-          />
-          <SettingsColumn
-            size={size}
-            onSizeChange={(val) => handleSizeChange(val)}
-            onStart={() => handleStart()}
-          />
+        <div className="box-wrapper">
+          <div className="box">
+            <div className="room-code-wrapper">
+              <div className="room-title">{code}</div>
+              <div
+                onMouseEnter={() => handleOnHover()}
+                onMouseLeave={() => handleOffHover()}
+                onClick={() => handleCopy()}
+                className="room-code">
+                {gameID}
+              </div>
+            </div>
+            <PlayersColumn
+              socket={socket}
+              onUsernameSubmit={(username) => handleUsernameSubmit(username)}
+              onCancel={() => handleCancel()}
+            />
+            <SettingsColumn
+              size={size}
+              onSizeChange={(val) => handleSizeChange(val)}
+              onStart={() => handleStart()}
+            />
+          </div>
         </div>
       ) : (
         <TowerGame socket={socket} />

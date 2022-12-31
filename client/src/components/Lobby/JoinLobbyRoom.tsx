@@ -15,7 +15,7 @@ interface MySocket extends Socket {
 interface LobbyProps {
   children: never[] // ???????
   socket: MySocket
-  // gameID: string
+  gameID: string
   onCancel: () => void
 }
 interface SizeProps {
@@ -45,7 +45,7 @@ interface Podium {
 const URL: string = 'http://localhost:5000'
 
 // export default function JoinLobbyRoom({ socket, gameID, onCancel }: LobbyProps) {
-export default function JoinLobbyRoom({ socket, onCancel }: LobbyProps) {
+export default function JoinLobbyRoom({ socket, gameID, onCancel }: LobbyProps) {
   const [showPodium, setShowPodium] = useState(false)
   const [podium, setPodium] = useState({} as Podium)
   const [waitingForPlayers, setWaitingForPlayers] = useState(true)
@@ -101,6 +101,18 @@ export default function JoinLobbyRoom({ socket, onCancel }: LobbyProps) {
     setShowPodium(false)
   }
 
+  const [code, setCode] = useState('Room Code')
+  const handleOffHover = () => {
+    setCode('Room Code')
+  }
+  const handleOnHover = () => {
+    setCode('Click To Copy')
+  }
+  const handleCopy = () => {
+    navigator.clipboard.writeText(gameID)
+    setCode('Copied!')
+  }
+
   return (
     <div className="wrapper">
       {showPodium ? (
@@ -109,16 +121,28 @@ export default function JoinLobbyRoom({ socket, onCancel }: LobbyProps) {
           podium={podium}
         />
       ) : waitingForPlayers ? (
-        <div className="box">
-          <PlayersColumn
-            socket={socket}
-            onUsernameSubmit={(username) => handleUsernameSubmit(username)}
-            onCancel={() => handleCancel()}
-          />
-          <SettingsDisplay
-            size={size}
-          />
-        </div >
+        <div className="box-wrapper">
+          <div className="box">
+            <div className="room-code-wrapper">
+              <div className="room-title">{code}</div>
+              <div
+                onMouseEnter={() => handleOnHover()}
+                onMouseLeave={() => handleOffHover()}
+                onClick={() => handleCopy()}
+                className="room-code">
+                {gameID}
+              </div>
+            </div>
+            <PlayersColumn
+              socket={socket}
+              onUsernameSubmit={(username) => handleUsernameSubmit(username)}
+              onCancel={() => handleCancel()}
+            />
+            <SettingsDisplay
+              size={size}
+            />
+          </div >
+        </div>
       ) : gameStarted ? (
         <TowerGame initEvent='reconnect' socket={socket} />
       ) : (

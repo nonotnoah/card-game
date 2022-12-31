@@ -1,0 +1,83 @@
+div {
+  // border: 1px solid red;
+}
+.button-wrapper {
+  position: relative;
+  display: flex;
+  flex-flow: column;
+
+  width: 315px;
+  height: 350px;
+
+  justify-content: flex-start;
+  align-items: center;
+  
+}
+
+button {
+  height: 13.2%; // same size as other home button
+  width: 80%;
+}
+.or {
+  padding: 46.2px;
+}
+.join-wrapper {
+  // position: absolute;
+  // bottom: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  height: 26.4%;
+  form {
+    input {
+      width: 80%;
+      height: 46.2px;
+      margin-bottom: 23.1px;
+      text-align: center;
+    }
+    .join-btn {
+      width: 80%;
+      height: 46.2px;
+    }
+  }
+  .alert {
+    position: absolute;
+    width: 100%;
+    transform: translate(0%, calc(100% + 23.1px));
+    user-select: none;
+    display: flex;
+    justify-content: center;
+    .message-wrapper {
+      height: 46.2px;
+      align-items: center;
+      background-color: rgba(255, 0, 0, 0.685);
+      width: 80%;
+      display: flex;
+      justify-content: center;
+      border-radius: 10px;
+    }
+    margin-bottom: 23.1px;
+    animation-name: show;
+    animation-duration: .25s;
+    // animation-timing-function: ease-in;
+    z-index: -1;
+  }
+}
+@keyframes show {
+  from {
+    transform: translate(0%, 0%);
+    // transform: translate(0%, calc(-100% + -23.1px));
+  }
+  to {
+    transform: translate(0%, calc(100% + 23.1px));
+  }
+}
+.gray {
+  color: #ffffff80;
+}
+// .host-btn {
+//   position: absolute;
+
+//   top: 0;
+// }
