@@ -55,6 +55,7 @@ export default function HostLobbyRoom({ socket, gameID, onCancel }: LobbyProps) 
 
   const handleUsernameSubmit = (username: string) => { }
   // disconnect socket and call prop onCancel to get back to Lobbies.tsx
+  // console.log(socket._callbacks)
   const handleCancel = () => {
     socket.emit('cancel')
     sessionStorage.removeItem('sessionID')
@@ -68,11 +69,13 @@ export default function HostLobbyRoom({ socket, gameID, onCancel }: LobbyProps) 
   }
 
   const handleSizeChange = (val: SizeProps) => {
+    console.log('changed size', val)
     socket.emit('sizeChange', val)
   }
 
   useEffect(() => {
     socket.on('sizeChange', (res: SizeProps) => {
+      console.log('heard sizechange', res)
       setSize(res)
     })
 
@@ -85,6 +88,7 @@ export default function HostLobbyRoom({ socket, gameID, onCancel }: LobbyProps) 
 
     return (): void => {
       socket.removeAllListeners();
+      console.log('removed all listeners')
     };
   }, [socket]);
 

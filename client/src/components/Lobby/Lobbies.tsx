@@ -38,9 +38,9 @@ export default function Lobbies() {
       socket.current.auth = { sessionID };
       socket.current.userID = userID
       // store in sessionStorage. this should implement localStorage in live build
-      sessionStorage.setItem("sessionID", sessionID);
-      sessionStorage.setItem('gameID', gameID.current)
-      console.log("set sessionID:", sessionID);
+      // sessionStorage.setItem("sessionID", sessionID);
+      // sessionStorage.setItem('gameID', gameID.current)
+      // console.log("set sessionID:", sessionID);
     });
 
     // open host options if socket becomes host
@@ -118,7 +118,7 @@ export default function Lobbies() {
           clearInterval(loop)
         } else {
           attempts++
-          if (attempts == 5) {
+          if (attempts == 600) {
             resolve(false)
             clearInterval(loop)
           }
@@ -139,10 +139,15 @@ export default function Lobbies() {
       setHostText('Creating game...')
       const loggedIn = await logIn(gameID.current, true)
       if (loggedIn) {
-        setHostText('Host')
         setIsHost(true)
         setIsJoin(false)
         clickable.current = true
+      } else {
+        setHostText('Could not create game!')
+        setTimeout(() => {
+          setHostText('Host')
+          clickable.current = true
+        }, 3000);
       }
     }
   }
@@ -159,6 +164,12 @@ export default function Lobbies() {
         setIsHost(false)
         setIsJoin(true)
         clickable.current = true
+      } else {
+        setJoinText('Could not connect!')
+        setTimeout(() => {
+          setJoinText('Join')
+          clickable.current = true
+        }, 3000);
       }
     }
   }

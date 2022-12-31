@@ -117,7 +117,7 @@ export default function TowerGame({ socket, initEvent }: SocketProps) {
 
     // cb
     return (): void => {
-      socket.removeAllListeners();
+      // socket.removeAllListeners();
     };
   }, [socket]);
 

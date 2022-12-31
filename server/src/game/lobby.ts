@@ -135,7 +135,7 @@ export default class Lobby {
   }
 
   // removes socket from server storage and finds new host if needed
-  cancel = (socket: MySocket) => {
+  deleteFromServerStorage = (socket: MySocket) => {
     console.log(socket.userID, 'cancelled')
     this.serverStorage.deleteSession(socket.sessionID)
     if (socket.isHost) {
@@ -149,16 +149,14 @@ export default class Lobby {
 
   disconnect = (socket: MySocket) => {
     console.log('lobby.ts disconnect')
-    // notify other users
-    // socket.broadcast.emit("user disconnected", socket.userID);
-    // update the connection status of the session
-    this.serverStorage.saveSession(socket.sessionID, {
-      userID: socket.userID,
-      username: socket.username,
-      gameID: socket.gameID,
-      isHost: socket.isHost,
-      connected: false,
-    });
+    // // update the connection status of the session
+    // this.serverStorage.saveSession(socket.sessionID, {
+    //   userID: socket.userID,
+    //   username: socket.username,
+    //   gameID: socket.gameID,
+    //   isHost: socket.isHost,
+    //   connected: false,
+    // });
 
     // if game started, dc socket from game 
     // and find new host but keep session 
@@ -171,18 +169,20 @@ export default class Lobby {
         this.newHost(socket) // this updates currentgame info too
       this.currentGame.disconnect(socket) // this emits currentgame update
     } else if (socket.isHost && !this.gameStarted) {
-      this.cancel(socket)
+      this.deleteFromServerStorage(socket)
     }
     console.log('Socket Closed: ', socket.userID)
   }
   // }
 
+  // emit to all when host changes size
   sizeChange = (socket: MySocket, size: SizeProps) => {
     this.currentSize = size
-    // console.log(this.currentSize);
+    console.log(this.currentSize);
     this.emitToRoom('sizeChange', size)
   }
 
+  // emit sizechange to single socket
   needSizeChange = (socket: MySocket) => {
     socket.emit('sizeChange', this.currentSize)
   }
@@ -193,6 +193,7 @@ export default class Lobby {
     }
     this.gameStarted = false
     this.currentGame = undefined
+    delete this.currentGame
   }
 
   needPlayers = (socket: MySocket) => {

@@ -20,7 +20,7 @@ class Deck {
     this.cards = this.makeDeck(n, shuffleArray(imgs))
     // make a deep copy of the deck
     // this.cardsCopy = shuffleDeck([...this.cards])
-    this.cardsCopy = shuffleDeck([...this.cards]).slice(52)
+    this.cardsCopy = shuffleDeck([...this.cards]).slice(55)
     // this.test()
   }
 

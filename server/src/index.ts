@@ -27,24 +27,25 @@ interface MySocket extends Socket {
 const serverStorage = new ServerSessionStore() // I wish this was an api
 
 io.use((socket: MySocket, next) => {
-  // on reconnect this will be the 'sessionID' value in sessionStorage
-  // on first connect this will be undefined
-  const sessionID: string = socket.handshake.auth.sessionID
-  console.log('session ID:', sessionID)
-  if (sessionID) {
-    // find existing session
-    const serverSession = serverStorage.findSession(sessionID)
-    console.log('found existing sesison:', sessionID)
-    if (serverSession) {
-      socket.sessionID = sessionID
-      socket.userID = serverSession.userID
-      socket.username = serverSession.username
-      socket.gameID = socket.handshake.auth.gameID
-      socket.isHost = socket.handshake.auth.isHost
-      socket.wins = 0
-      return next()
-    }
-  }
+
+  // // on reconnect this will be the 'sessionID' value in sessionStorage
+  // // on first connect this will be undefined
+  // const sessionID: string = socket.handshake.auth.sessionID
+  // console.log('session ID:', sessionID)
+  // if (sessionID) {
+  //   // find existing session
+  //   const serverSession = serverStorage.findSession(sessionID)
+  //   console.log('found existing sesison:', sessionID)
+  //   if (serverSession) {
+  //     socket.sessionID = sessionID
+  //     socket.userID = serverSession.userID
+  //     socket.username = serverSession.username
+  //     socket.gameID = socket.handshake.auth.gameID
+  //     socket.isHost = socket.handshake.auth.isHost
+  //     socket.wins = 0
+  //     return next()
+  //   }
+  // }
   const username = socket.handshake.auth.username
   const isHost = socket.handshake.auth.isHost
   const gameID = socket.handshake.auth.gameID
