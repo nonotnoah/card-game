@@ -19,9 +19,13 @@ class Deck {
     this.nValue = n
     this.cards = this.makeDeck(n, shuffleArray(imgs))
     // make a deep copy of the deck
-    // this.cardsCopy = shuffleDeck([...this.cards])
-    this.cardsCopy = shuffleDeck([...this.cards]).slice(55)
+    this.cardsCopy = shuffleDeck([...this.cards])
+    // this.cardsCopy = shuffleDeck([...this.cards]).slice(55)
     // this.test()
+  }
+
+  public symbolsToDeckSize(s: number) {
+    return (s ^ 2 - s + 1)
   }
 
   public length() {

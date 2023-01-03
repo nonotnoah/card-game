@@ -21,14 +21,14 @@ export default function SettingsColumn({ size, onSizeChange, onStart }: Settings
   const sizeDescription = useRef(size.description)
 
   const handleClick = (sign: string) => {
-    const sizeNumbers = [4, 8, 12]
-    const sizeNames = ['Small', 'Normal', 'Large']
+    const sizeNumbers = [6, 8, 9]
+    const sizeNames = ['Small: 30 cards', 'Normal: 57 cards', 'Large: 73 cards']
     const sizeDescriptions = ['Faster pace', 'The standard experience', 'More difficult']
     const currentNumber = sizeNumbers.indexOf(numberOfSymbols.current)
     const currentName = sizeNames.indexOf(sizeName.current)
     const currentDescription = sizeDescriptions.indexOf(sizeDescription.current)
     let symbol: number = 8
-    let name: string = 'Normal'
+    let name: string = 'Normal: 57 cards'
     let description: string = 'The standard experience'
     if (sign == '-' && currentNumber != 0) {
       symbol = sizeNumbers[currentNumber - 1]

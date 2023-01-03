@@ -191,7 +191,8 @@ export default function Lobbies() {
   return (
     <div className="wrapper">
       {gameRunning ? (
-        <TowerGame socket={socket.current}></TowerGame>
+        <></>
+        // <TowerGame numSymbols={size.symbol} socket={socket.current}></TowerGame>
       ) : isHost ? (
         <HostLobbyRoom
           socket={socket.current}

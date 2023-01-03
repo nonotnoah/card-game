@@ -14,7 +14,6 @@ interface CardProps {
 }
 
 export default function MidCard({ hasGuessed, canPlay, card, onClick, match, countDown }: CardProps) {
-  // const faceDown = ['🚫', '🚫', '🚫', '🚫', '🚫', '🚫', '🚫', '🚫']
   const [symbolClass, setSymbolClass] = useState('')
   const symbClassSet = useRef(false)
   const faceDown: string[] = []
@@ -43,30 +42,17 @@ export default function MidCard({ hasGuessed, canPlay, card, onClick, match, cou
       onClick(emoji)
     }
   }
-  
+
   // animations 
   const [midClass, setMidClass] = useState('mid-card rotate')
   const startFadeIn = useRef(false)
-  const slideInOut = () => {
-    if (match.guess != '') {
-      setTimeout(() => {
-        setMidClass('mid-card slide-out')
-      }, 1000)
-      setTimeout(() => {
-        setMidClass('mid-card slide-in')
-      }, 1750)
-      setTimeout(() => {
-        setMidClass('mid-card rotate')
-      }, 2500)
-    }
-  }
 
-  const spinIn = () => {
+  const fadeIn = () => {
     setMidClass('mid-card fadein')
     setTimeout(() => {
       setMidClass('mid-card rotate')
-      startFadeIn.current = false
-    }, 0)
+      // startFadeIn.current = false
+    }, 3000)
   }
 
   const spinOut = () => {
@@ -82,7 +68,7 @@ export default function MidCard({ hasGuessed, canPlay, card, onClick, match, cou
 
   if (countDown && !startFadeIn.current) {
     startFadeIn.current = true
-    spinIn()
+    fadeIn()
   }
   if (match.guess != '') {
     spinOut()
@@ -93,13 +79,13 @@ export default function MidCard({ hasGuessed, canPlay, card, onClick, match, cou
       <div className={midClass}>
         {card.state == 'faceUp' ? (
           card.symbols?.map(emoji => (
-            <div className="symbol-wrapper">
+            <div key={midKey()} className="symbol-wrapper">
               <span
                 className={`
                   ${match.guess == emoji ? 'flash-correct' : ''}
                   ${symbolClass}
                 `}
-                onClick={() => handleClick(emoji)} key={midKey()}>{emoji}</span>
+                onClick={() => handleClick(emoji)} >{emoji}</span>
             </div>
           ))
         ) : (

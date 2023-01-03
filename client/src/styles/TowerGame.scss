@@ -100,7 +100,6 @@ div {
   animation-duration: 0.5s;
   animation-timing-function: ease-out;
 }
-
 @keyframes fadein {
   from {
     opacity: 0%;
@@ -114,9 +113,7 @@ div {
   animation-duration: 3s;
   animation-timing-function: ease-in-out;
 }
-.red {
-  background-color: red;
-}
+
 .mid-card {
   width: 100%;
   height: 100%;
@@ -125,49 +122,8 @@ div {
   display: flex;
   justify-content: center;
   align-items: center;
-
-  // transform: rotate(90deg);
-  // transition: 1s;
-
-  div {
-    text-align: center;
-    position: absolute;
-    width: 50%;
-    right: 0;
-    font-size: 3rem;
-    height: auto;
-    transform-origin: left;
-  }
-  span {
-    display: flex;
-    margin: 25%;
-    align-items: center;
-    justify-content: center;
-    width: 85px;
-    height: 85px;
-    // background-color: red;
-    border-radius: 50%;
-  }
-  .symbol-wrapper {
-    height: 1px;
-  }
-  .symbol-wrapper span {
-    transition: 0.1s;
-  }
-  .symbol-wrapper span:hover {
-    font-size: 4rem;
-    transition: 0.1s;
-    transition-timing-function: ease-out;
-    cursor: pointer;
-  }
-  .symbol-wrapper span:active {
-    font-size: 3rem;
-  }
-}
-@for $i from 1 through 8 {
-  .mid-card div:nth-child(#{$i}) {
-    transform: rotate(calc(#{$i} * 45deg));
-  }
+  // the rest of the styling is conditional and defined in
+  // C:\Users\Noah\javascript-projects\card-game\client\src\components\Game\Styles\*.scss
 }
 
 .opacity-50 {
@@ -203,6 +159,7 @@ div {
   position: absolute;
   left: 50%;
   top: 75%;
+  width: 100%;
   margin: 0 auto;
   transform: translate(-50%, -50%);
 

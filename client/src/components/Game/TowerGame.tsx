@@ -6,23 +6,28 @@ import '../../styles/TowerGame.scss'
 import MidCard from './MidCard'
 import MyEmojis from './MyEmojis'
 import Players from './Players'
-import { useEffect, useState } from 'react'
+import { Suspense, lazy, useEffect, useState, ReactNode } from 'react'
 import { Socket } from 'socket.io-client'
 import GameState from '../../../../server/src/interfaces/GameState' // LOL
+
+const SymbolTheme10 = lazy(() => import('./Styles/10symbols'))
+const SymbolTheme8 = lazy(() => import('./Styles/8symbols'))
+const SymbolTheme6 = lazy(() => import('./Styles/6symbols'))
 
 interface MySocket extends Socket {
   [key: string]: any;
 }
-interface SocketProps {
+interface TowerGameProps {
   socket: MySocket;
   initEvent?: string
+  numSymbols: number
 }
 interface CardObj {
   state: string,
   symbols: string[] | undefined
 }
 
-export default function TowerGame({ socket, initEvent }: SocketProps) {
+export default function TowerGame({ numSymbols, socket, initEvent }: TowerGameProps) {
   const [ready, setReady] = useState(false)
   const [countingDown, setCountingDown] = useState(false)
   const [count, setCount] = useState(0)
@@ -149,6 +154,24 @@ export default function TowerGame({ socket, initEvent }: SocketProps) {
   const handleClick = () => {
     console.log(gameState)
   }
+
+  interface ThemeProps {
+    children?: ReactNode
+  }
+
+  const ThemeSelector = ({ children }: ThemeProps) => {
+    console.log(numSymbols)
+    return (
+      <>
+        <Suspense fallback={<></>}>
+          {(numSymbols === 6) && <SymbolTheme6 />}
+          {(numSymbols === 8) && <SymbolTheme8 />}
+          {(numSymbols === 9) && <SymbolTheme10 />}
+        </Suspense>
+        {children}
+      </>
+    )
+  }
   return (
     <div className="game-wrapper">
       {/* <button onClick={() => handleClick()}>gamestate</button> */}
@@ -168,6 +191,7 @@ export default function TowerGame({ socket, initEvent }: SocketProps) {
       {(currentPlayer.canPlay && gameState.isRunning && !countingDown) && (
         <div className="center remaining">{gameState.cardsRemaining}</div>
       )}
+      <ThemeSelector />
       <MidCard
         hasGuessed={hasGuessed}
         canPlay={currentPlayer.canPlay}

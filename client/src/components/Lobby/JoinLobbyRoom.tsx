@@ -144,9 +144,9 @@ export default function JoinLobbyRoom({ socket, gameID, onCancel }: LobbyProps) 
           </div >
         </div>
       ) : gameStarted ? (
-        <TowerGame initEvent='reconnect' socket={socket} />
+        <TowerGame numSymbols={size.symbol} initEvent='reconnect' socket={socket} />
       ) : (
-        <TowerGame socket={socket} />
+        <TowerGame numSymbols={size.symbol} socket={socket} />
       )}
     </div >
   )

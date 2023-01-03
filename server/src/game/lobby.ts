@@ -38,7 +38,7 @@ export default class Lobby {
     this.serverStorage = serverStorage
     this.gameStarted = false
     // this.currentGame = {} // this might not work
-    this.currentSize = { symbol: 8, name: 'Normal', description: 'The standard experience' }
+    this.currentSize = { symbol: 8, name: 'Normal: 57 cards', description: 'The standard experience' }
   }
   
   // Init -------------------------------------

@@ -49,7 +49,7 @@ export default function HostLobbyRoom({ socket, gameID, onCancel }: LobbyProps) 
   const [waitingForPlayers, setWaitingForPlayers] = useState(true);
   const [size, setSize] = useState<SizeProps>({
     symbol: 8,
-    name: 'Normal',
+    name: 'Normal: 57 cards',
     description: 'The standard experience'
   })
 
@@ -147,7 +147,7 @@ export default function HostLobbyRoom({ socket, gameID, onCancel }: LobbyProps) 
           </div>
         </div>
       ) : (
-        <TowerGame socket={socket} />
+        <TowerGame numSymbols={size.symbol} socket={socket} />
       )}
     </div>
   );
