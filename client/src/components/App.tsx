@@ -5,7 +5,8 @@ import ClientGame from './ClientGame'
 import Lobbies from './Lobby/Lobbies'
 import TowerGame from './Game/TowerGame'
 
-const URL: string = 'http://localhost:5000'
+// const URL: string = 'http://localhost:5000'
+const URL: string = "https://noahs.website:5000"
 
 // TODO: add thereisnourflevel for secret menu
 function App() {
@@ -21,8 +22,8 @@ function App() {
   return (
     <div className="wrapper">
       {loggedIn ? (
-        // <ClientGame socket={socket.current}></ClientGame>
-        <TowerGame socket={socket.current}></TowerGame>
+        // <TowerGame socket={socket.current}></TowerGame>
+        <></>
       ) : (
         <Lobbies />
       )}

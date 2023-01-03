@@ -64,7 +64,8 @@ function _Dev() {
 
 function Dev() {
   return (
-    <TowerGame></TowerGame>
+    // <TowerGame></TowerGame>
+    <></>
   )
 }
 

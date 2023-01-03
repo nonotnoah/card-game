@@ -7,7 +7,9 @@ import HostLobbyRoom from "./HostLobbyRoom"
 import JoinLobbyRoom from "./JoinLobbyRoom"
 import '../../styles/Lobbies.scss'
 
-const URL: string = "http://localhost:5000"
+// const URL: string = "http://localhost:5000"
+const URL: string = "https://noahs.website:5000"
+
 interface MySocket extends Socket {
   [key: string]: any;
 }
