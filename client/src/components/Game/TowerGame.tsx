@@ -10,9 +10,9 @@ import { Suspense, lazy, useEffect, useState, ReactNode } from 'react'
 import { Socket } from 'socket.io-client'
 import GameState from '../../../../server/src/interfaces/GameState' // LOL
 
-const SymbolTheme10 = lazy(() => import('./Styles/10symbols'))
-const SymbolTheme8 = lazy(() => import('./Styles/8symbols'))
-const SymbolTheme6 = lazy(() => import('./Styles/6symbols'))
+const SymbolThemeL = lazy(() => import('./Styles/SymbolsL'))
+const SymbolThemeM = lazy(() => import('./Styles/SymbolsM'))
+const SymbolThemeS = lazy(() => import('./Styles/SymbolsS'))
 
 interface MySocket extends Socket {
   [key: string]: any;
@@ -164,9 +164,9 @@ export default function TowerGame({ numSymbols, socket, initEvent }: TowerGamePr
     return (
       <>
         <Suspense fallback={<></>}>
-          {(numSymbols === 6) && <SymbolTheme6 />}
-          {(numSymbols === 8) && <SymbolTheme8 />}
-          {(numSymbols === 9) && <SymbolTheme10 />}
+          {(numSymbols === 6) && <SymbolThemeS />}
+          {(numSymbols === 8) && <SymbolThemeM />}
+          {(numSymbols === 9) && <SymbolThemeL />}
         </Suspense>
         {children}
       </>

@@ -118,7 +118,7 @@ export default function Lobbies() {
           clearInterval(loop)
         } else {
           attempts++
-          if (attempts == 600) {
+          if (attempts == 10) {
             resolve(false)
             clearInterval(loop)
           }

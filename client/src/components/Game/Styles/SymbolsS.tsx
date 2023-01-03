@@ -1,4 +1,4 @@
-import './6symbols.scss'
+import './SymbolsS.scss'
 
 const SymbolTheme = () => (<></>)
 
