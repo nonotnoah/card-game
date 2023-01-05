@@ -7,8 +7,16 @@ import HostLobbyRoom from "./HostLobbyRoom"
 import JoinLobbyRoom from "./JoinLobbyRoom"
 import '../../styles/Lobbies.scss'
 
+let URL: string
+if (import.meta.env.DEV) {
+  URL = "http://localhost:5000"
+  console.log('dev environment')
+} else {
+  URL = "https://noahs.website:5000"
+  console.log('prod environment')
+}
 // const URL: string = "http://localhost:5000"
-const URL: string = "https://noahs.website:5000"
+// const URL: string = "https://noahs.website:5000"
 
 interface MySocket extends Socket {
   [key: string]: any;
