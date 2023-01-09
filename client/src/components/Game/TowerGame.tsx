@@ -6,7 +6,7 @@ import '../../styles/TowerGame.scss'
 import MidCard from './MidCard'
 import MyEmojis from './MyEmojis'
 import Players from './Players'
-import { Suspense, lazy, useEffect, useState, ReactNode } from 'react'
+import { Suspense, lazy, useEffect, useState, ReactNode, useRef } from 'react'
 import { Socket } from 'socket.io-client'
 import GameState from '../../../../server/src/interfaces/GameState' // LOL
 
@@ -32,7 +32,7 @@ export default function TowerGame({ numSymbols, socket, initEvent }: TowerGamePr
   const [countingDown, setCountingDown] = useState(false)
   const [count, setCount] = useState(0)
   const [match, setMatch] = useState({ userID: '', guess: '' })
-  const [hasGuessed, setHasGuessed] = useState(false)
+  const hasGuessed = useRef(false)
   const [gameState, setGameState] = useState<GameState>({
     winner: '',
     isRunning: false,
@@ -80,12 +80,12 @@ export default function TowerGame({ numSymbols, socket, initEvent }: TowerGamePr
   useEffect(() => {
     socket.on('update', (reason, updatedGameState: GameState) => {
       if (reason == 'next turn') {
-        setHasGuessed(false)
+        hasGuessed.current = false
         asyncWait(setGameState, updatedGameState, 1250)
         asyncWait(setMatch, { userID: '', guess: '' }, 500)
         console.log(hasGuessed)
       } else if (reason == 'no one guessed right') {
-        setHasGuessed(false)
+        hasGuessed.current = false
       } else {
         setGameState(updatedGameState)
       }
@@ -96,7 +96,7 @@ export default function TowerGame({ numSymbols, socket, initEvent }: TowerGamePr
       setCountingDown(true)
       setCount(seconds)
       setTimeout(() => {
-        setHasGuessed(false)
+        hasGuessed.current = false
         setGameState(updatedGameState)
       }, seconds * 1000)
     })
@@ -145,7 +145,7 @@ export default function TowerGame({ numSymbols, socket, initEvent }: TowerGamePr
   }
 
   const handleGuess = (emoji: string) => {
-    setHasGuessed(true)
+    hasGuessed.current = true
     console.log('clicked', emoji)
     socket.emit('guess', emoji) // TODO: send timestamp
   }
@@ -193,7 +193,7 @@ export default function TowerGame({ numSymbols, socket, initEvent }: TowerGamePr
       )}
       <ThemeSelector />
       <MidCard
-        hasGuessed={hasGuessed}
+        hasGuessed={hasGuessed.current}
         canPlay={currentPlayer.canPlay}
         countDown={countingDown}
         match={match}

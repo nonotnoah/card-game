@@ -12,7 +12,7 @@ if (import.meta.env.DEV) {
   URL = "http://localhost:5000"
   console.log('dev environment')
 } else {
-  URL = "https://noahs.website:5000"
+  URL = "https://noahs.website"
   console.log('prod environment')
 }
 // const URL: string = "http://localhost:5000"
