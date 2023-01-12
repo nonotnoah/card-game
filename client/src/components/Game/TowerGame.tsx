@@ -50,6 +50,8 @@ export default function TowerGame({ numSymbols, socket, initEvent }: TowerGamePr
         score: 0,
         canPlay: true,
         guessTimes: [],
+        pingBuffer: [],
+        avgPing: 0,
         card: {
           state: 'faceDown',
           symbols: []
@@ -71,6 +73,9 @@ export default function TowerGame({ numSymbols, socket, initEvent }: TowerGamePr
     }
   }
 
+  /**  @description trigger function with args after delay in ms
+   * 
+   * */
   const asyncWait = (func: Function, args: any, time: number) => {
     setTimeout(() => {
       func(args)
@@ -78,6 +83,10 @@ export default function TowerGame({ numSymbols, socket, initEvent }: TowerGamePr
   }
 
   useEffect(() => {
+    // send client ping on any event received
+    socket.onAny(() => {
+      socket.emit('ping', Date.now())
+    })
     socket.on('update', (reason, updatedGameState: GameState) => {
       if (reason == 'next turn') {
         hasGuessed.current = false
@@ -122,7 +131,12 @@ export default function TowerGame({ numSymbols, socket, initEvent }: TowerGamePr
 
     // cb
     return (): void => {
-      // socket.removeAllListeners();
+      // manually clear all listeners. triggers when component unmounts
+      socket.removeListener('goodMatch')
+      socket.removeListener('draw')
+      socket.removeListener('playerLeave')
+      socket.removeListener('reveal')
+      socket.removeListener('update')
     };
   }, [socket]);
 
@@ -136,7 +150,9 @@ export default function TowerGame({ numSymbols, socket, initEvent }: TowerGamePr
   // ask for gameState on first render
   useEffect(() => {
     socket.emit('needUpdate')
-    console.log('asked for update')
+    // console.log('asked for update')
+
+
   }, [])
 
   const handleReady = () => {
@@ -146,8 +162,9 @@ export default function TowerGame({ numSymbols, socket, initEvent }: TowerGamePr
 
   const handleGuess = (emoji: string) => {
     hasGuessed.current = true
-    console.log('clicked', emoji)
-    socket.emit('guess', emoji) // TODO: send timestamp
+    socket.emit('guess', emoji, Date.now()) // TODO: send timestamp
+    // console.log('clicked', emoji)
+    
   }
 
   // testing

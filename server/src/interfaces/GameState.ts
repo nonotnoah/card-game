@@ -15,6 +15,8 @@ export default interface GameState {
       score: number
       canPlay: boolean
       guessTimes: number[]
+      pingBuffer: number[]
+      avgPing: number
       card: {
         state: string
         symbols: string[] | undefined // TOOD: add undef handle in clientgame

@@ -9,28 +9,31 @@ interface MySocket extends Socket {
 interface Players {
   [key: string]: MySocket
 }
+interface guess {
+  guess: string
+  time: number
+  socket: MySocket
+}
 
 export class TowerGame extends BasicGame {
+  guessBuffer: guess[]
+  firstGuess: Boolean
   constructor(io: Server, players: Players, gameID: string, Deck: Deck) {
     super(io, players, gameID, Deck)
-    this.rules = this.initRules() // Override BasicGame rules
-    // this.addListenersToAll(this.rules)
+    this.guessBuffer = []
+    this.firstGuess = false
+    // this.rules = this.initRules() // Override BasicGame rules
+
     this.addAnonListenerToAll('needUpdate', this.needUpdate)
     this.addAnonListenerToAll('guess', this.guess)
-    // debug check if current rules work
-    console.log('CURRENT RULES:', this.currentRules)
 
-    // show currently connected players
+    // map currently connected players to convenient variable
     this.sockets.map(socket => {
       this.gameState.connectedPlayers[socket.userID].username = socket.username
     })
 
     //try to start game every second
     const loop = setInterval(async () => {
-      // console.log('checking for ready');
-      // not needed unless reconnect logic is created
-      // this.emitUpdateGameState('refreshing lobby')
-
       const result = await this.checkReady()
       if (this.startAttempts > 600) { // game can wait for 10 min before closing
         clearInterval(loop)
@@ -63,7 +66,7 @@ export class TowerGame extends BasicGame {
   }
 
   /**
-   * @returns
+   * @description unlocks guessing for all players if everyone guessed false
    */
   checkFilter() {
     let filterList: boolean[] = []
@@ -74,10 +77,9 @@ export class TowerGame extends BasicGame {
         filterList.push(false)
       }
     })
-    const clearFilter = filterList.some(val => {
-      return val == true
-    })
-    if (!clearFilter) {
+    // returns true is every item in array is false
+    const checkFalse = (arr: Boolean[]) => arr.every((val: Boolean) => val === false)
+    if (checkFalse(filterList)) {
       this.userIDs.map(id => {
         this.gameState.connectedPlayers[id].canPlay = true
       })
@@ -107,6 +109,8 @@ export class TowerGame extends BasicGame {
         score: 1,
         canPlay: true,
         guessTimes: [],
+        pingBuffer: [],
+        avgPing: 0,
         card: {
           state: 'faceDown',
           symbols: []
@@ -121,37 +125,63 @@ export class TowerGame extends BasicGame {
   needUpdate = (socket: MySocket) => {
     console.log('SENT UPDATE TO: ', socket.username)
     // socket.emit('update', this.gameState)
-    this.emitUpdateGameState('client needed update')
+    this.emitUpdateGameState('client requested update')
   }
 
-  guess = (guess: any, socket: MySocket) => {
+  /**
+   * figure out which guess game first
+   */
+  guessDecider = () => {
+    const earliestTime = Math.min.apply(Math, this.guessBuffer.map((guessObj) => {
+      return guessObj.time
+    }))
+    const winner = this.guessBuffer.find((guessObj) => {
+      return guessObj.time == earliestTime
+    })
 
-    // console.log('guessed', guess)
-    const match = this.deck.checkGuess(guess, this.gameState.connectedPlayers[socket.userID].card)
-    // console.log('found match with mid card', match)
-    const guessPayload = { userID: socket.userID, guess }
-    if (match) {
-      const diff = Date.now() - this.timeStart
-      this.gameState.connectedPlayers[socket.userID].guessTimes.push(diff)
-      this.gameState.connectedPlayers[socket.userID].score++
-      this.gameState.connectedPlayers[socket.userID].card = this.gameState.middleCard
-      this.emitToRoom('goodMatch', guessPayload)
-      // update client on gamestate
-      if (this.nextTurn()) {
-        this.emitUpdateGameState('next turn')
-        setTimeout(() => {
-          this.timeStart = Date.now()
-        }, 1500) // this delay is how long spin animation takes
-      } else {
-        this.endGame()
-      } // endGame()?
-    } else { // player will not be able to guess until next turn/update
-      this.gameState.connectedPlayers[socket.userID].canPlay = false
-      socket.emit('badMatch', guessPayload)
-      this.emitUpdateGameState('bad match')
+    if (winner) {
+      // console.log('guessed', guess)
+      const match = this.deck.checkGuess(winner.guess, this.gameState.connectedPlayers[winner.socket.userID].card)
+      // console.log('found match with mid card', match)
+      const guessPayload = { userID: winner.socket.userID, guess: winner.guess }
+      if (match) {
+        const diff = Date.now() - this.timeStart
+        this.gameState.connectedPlayers[winner.socket.userID].guessTimes.push(diff)
+        this.gameState.connectedPlayers[winner.socket.userID].score++
+        this.gameState.connectedPlayers[winner.socket.userID].card = this.gameState.middleCard
+        this.emitToRoom('goodMatch', guessPayload)
+        // update client on gamestate
+        if (this.nextTurn()) {
+          this.emitUpdateGameState('next turn')
+          setTimeout(() => {
+            this.timeStart = Date.now()
+          }, 1500) // this delay is how long spin animation takes
+        } else {
+          this.endGame()
+        } // endGame()?
+      } else { // player will not be able to guess until next turn/update
+        this.gameState.connectedPlayers[winner.socket.userID].canPlay = false
+        winner.socket.emit('badMatch', guessPayload)
+        this.emitUpdateGameState('bad match')
+      }
+      // expensive way to check if everyone guessed wrong
+      this.checkFilter()
     }
-    // expensive way to check if everyone guessed wrong
-    this.checkFilter()
+  }
+
+  guess = (guess: string, time: number, socket: MySocket) => {
+    // add guess to buffer
+    const guessObj: guess = { guess, time, socket }
+    this.guessBuffer.push(guessObj)
+
+    // calculate guesses gathered in buffer over the last 1s
+    if (!this.firstGuess) {
+      this.firstGuess = true // prevent mutiple checks
+      setTimeout(() => {
+        this.guessDecider()
+        this.firstGuess = false
+      }, 1000)
+    }
   }
 
   vote(type: any, socket: MySocket) {

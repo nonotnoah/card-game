@@ -66,6 +66,10 @@ let currentLobbies: Lobbies = {}
 
 io.on('connection', (socket: MySocket) => {
   console.log('socket connected:', socket.sessionID, socket.userID, socket.gameID, socket.isHost)
+  socket.on("ping", (callback) => {
+    const ping = Date.now() - callback
+    console.log(ping)
+  });
 
   // create new lobby if host, then join
   if (!currentLobbies[socket.gameID]) { // lobby doesn't exist
