@@ -60,6 +60,8 @@ class BasicGame {
         score: 0,
         canPlay: true,
         guessTimes: [],
+        pingBuffer: [],
+        avgPing: 0,
         card: { state: 'faceDown', symbols: [] }
       }
     }
@@ -67,6 +69,7 @@ class BasicGame {
     // add default listeners to all
     // this.addListenersToAll(this.rules)
     this.addAnonListenerToAll('ready', this.ready)
+    this.addAnonListenerToAll('ping', this.ping)
     // this.addAnonListenerToAll('needUpdate', this.needUpdate)
   }
 
@@ -92,6 +95,11 @@ class BasicGame {
     this.io.in(this.gameID).emit(event, ...args)
   }
 
+  /** 
+   * @emits emits current gameState in one convenient function
+  *
+   * reason not optional
+  */
   emitUpdateGameState(reason: string) {
     this.io.in(this.gameID).emit('update', reason, this.gameState)
   }
@@ -261,6 +269,19 @@ class BasicGame {
     this.gameState.connectedPlayers[userID].ready = true
     this.emitToRoom('update', 'player ready', this.gameState)
     this.readyList.push(userID)
+  }
+
+  ping = (time: number, socket: MySocket) => {
+    const ping = Date.now() - time
+    const bufferLength = this.gameState.connectedPlayers[socket.userID].pingBuffer.length
+    if (bufferLength > 4) {
+      this.gameState.connectedPlayers[socket.userID].pingBuffer.pop()
+    }
+    this.gameState.connectedPlayers[socket.userID].pingBuffer.push(ping)
+    const average = this.gameState.connectedPlayers[socket.userID].pingBuffer.reduce((sum, val) => {
+      return sum + val
+    }, 0) / bufferLength
+    this.gameState.connectedPlayers[socket.userID].avgPing = average
   }
 
   // needUpdate = (socket: MySocket) => {

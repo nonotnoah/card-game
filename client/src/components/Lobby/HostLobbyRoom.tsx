@@ -113,9 +113,13 @@ export default function HostLobbyRoom({ socket, gameID, onCancel }: LobbyProps) 
     navigator.clipboard.writeText(gameID)
     setCode('Copied!')
   }
+  const dev = () => {
+    socket.emit('ping', Date.now())
+  }
 
   return (
     <div className="wrapper">
+      <button style={{ zIndex: 100, width: '100px', position: "absolute"}} onClick={() => dev()}>ping</button>
       {showPodium ? (
         <Podium
           onClose={() => handleClose()}
