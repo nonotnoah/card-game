@@ -148,6 +148,7 @@ export default function Lobbies() {
       // gameID.current = '12345'
       setHostText('Creating game...')
       const loggedIn = await logIn(gameID.current, true)
+      setHostText('Host')
       if (loggedIn) {
         setIsHost(true)
         setIsJoin(false)
@@ -169,8 +170,8 @@ export default function Lobbies() {
       gameID.current = id
       setJoinText('Joining game...')
       const loggedIn = await logIn(gameID.current, false)
+      setJoinText('Join')
       if (loggedIn) {
-        setJoinText('Join')
         setIsHost(false)
         setIsJoin(true)
         clickable.current = true
