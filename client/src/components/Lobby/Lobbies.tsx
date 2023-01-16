@@ -6,6 +6,9 @@ import TowerGame from "../Game/TowerGame"
 import HostLobbyRoom from "./HostLobbyRoom"
 import JoinLobbyRoom from "./JoinLobbyRoom"
 import '../../styles/Lobbies.scss'
+import timesync from 'timesync'
+// import timesync from '../../../node_modules/timesync/dist/timesync.js'
+// import timesync from '../../../node_modules/timesync/src/timesync'
 
 let URL: string
 if (import.meta.env.DEV) {
@@ -122,9 +125,33 @@ export default function Lobbies() {
     return new Promise<boolean>((resolve) => {
       let attempts = 0
       const loop = setInterval(() => {
+        // try to connect 10 times
         console.log('looping')
         if (connected) {
           resolve(true)
+
+          const ts = timesync.create({
+            server: socket.current,
+            interval: 10000
+          })
+
+          ts.send = function (socket: MySocket, data: any, timeout: number) {
+            //console.log('send', data);
+            return new Promise(function (resolve, reject) {
+              var timeoutFn = setTimeout(reject, timeout);
+
+              socket.emit('timesync', data, function () {
+                clearTimeout(timeoutFn);
+                resolve(undefined);
+              });
+            });
+          };
+
+          socket.current.on('timesync', (data) => {
+            console.log('receive', data);
+            ts.receive(null, data);
+          });
+
           clearInterval(loop)
         } else {
           attempts++
@@ -174,6 +201,7 @@ export default function Lobbies() {
         setIsHost(false)
         setIsJoin(true)
         clickable.current = true
+        // socket.current.emit('syncRequest')
       } else {
         setJoinText('Could not connect!')
         setTimeout(() => {

@@ -1,7 +1,9 @@
 // imports
+import fs from 'fs'
 import express from 'express'
 import http from 'http'
 import { Server, Socket } from 'socket.io'
+// const timesyncServer: any = require('../timesync/timesync.min.js')
 
 import Lobby from './game/lobby'
 import randomID from './utils/randomID'
@@ -112,8 +114,45 @@ io.on('connection', (socket: MySocket) => {
   // debug currently connected players
   // let playerIDs = serverStorage.findAllSessions()
   // console.log('sessions:\n', ...playerIDs)
+  socket.on('timesync', function (data) {
+    console.log('message', data);
+    socket.emit('timesync', {
+      id: data && 'id' in data ? data.id : null,
+      result: Date.now()
+    });
+  });
 })
 
 server.listen(5000, () => {
   console.log('Server started on port 5000')
 })
+// function handler (req: any, res: any) {
+//   console.log('request', req.url);
+
+//   if (req.url === '/timesync/timesync.js') {
+//     res.setHeader('Content-Type', 'application/javascript');
+//     // return sendFile(path.join(__dirname, '../../../dist/timesync.js'), res);
+//     return sendFile('../timesync/timesync.min.js', res);
+//   }
+
+//   if (req.url === '/' || req.url === 'index.html') {
+//     return sendFile(__dirname + '/index.html', res);
+//   }
+
+//   res.writeHead(404);
+//   res.end('Not found');
+// }
+
+
+function sendFile(filename: string, res: any) {
+  fs.readFile(filename,
+    function (err, data) {
+      if (err) {
+        res.writeHead(500);
+        return res.end('Error loading ' + filename.split('/').pop());
+      }
+
+      res.writeHead(200);
+      res.end(data);
+    });
+}
