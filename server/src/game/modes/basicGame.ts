@@ -271,6 +271,7 @@ class BasicGame {
     this.readyList.push(userID)
   }
 
+  // TODO: make a module that syncs client time to server time
   ping = (time: number, socket: MySocket) => {
     const ping = Date.now() - time
     const bufferLength = this.gameState.connectedPlayers[socket.userID].pingBuffer.length

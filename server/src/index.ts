@@ -112,6 +112,13 @@ io.on('connection', (socket: MySocket) => {
   // debug currently connected players
   // let playerIDs = serverStorage.findAllSessions()
   // console.log('sessions:\n', ...playerIDs)
+  io.on('connection', socket => {
+    socket.on('timesync', time => {
+      // console.log('heard client time:', time)
+      const offset = Date.now() - time
+      socket.emit('timesync', offset * 2)
+    })
+  })
 })
 
 server.listen(5000, () => {
