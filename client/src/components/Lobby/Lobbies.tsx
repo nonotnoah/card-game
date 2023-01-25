@@ -6,6 +6,7 @@ import TowerGame from "../Game/TowerGame"
 import HostLobbyRoom from "./HostLobbyRoom"
 import JoinLobbyRoom from "./JoinLobbyRoom"
 import '../../styles/Lobbies.scss'
+import TimeSyncClient from "../../utils/timesync"
 
 let URL: string
 if (import.meta.env.DEV) {
@@ -106,6 +107,7 @@ export default function Lobbies() {
     socket.current.emit('needPlayers') // delay this until next render
   }, [needPlayers])
 
+  const ts = useRef<TimeSyncClient | undefined>()
   const logIn = async (gameID: string, isHost: boolean, sessionID?: string) => {
     const username = getRandomUsername()
     socket.current.auth = { sessionID, username, gameID, isHost }
@@ -124,6 +126,8 @@ export default function Lobbies() {
       const loop = setInterval(() => {
         console.log('looping')
         if (connected) {
+          ts.current = new TimeSyncClient(socket.current)
+          console.log
           resolve(true)
           clearInterval(loop)
         } else {
@@ -206,12 +210,14 @@ export default function Lobbies() {
         // <TowerGame numSymbols={size.symbol} socket={socket.current}></TowerGame>
       ) : isHost ? (
         <HostLobbyRoom
+          timesync={ts.current}
           socket={socket.current}
           gameID={gameID.current}
           onCancel={() => handleCancel()}>
         </HostLobbyRoom>
       ) : isGuest && lobbyFound ? (
         <JoinLobbyRoom
+          timesync={ts.current}
           socket={socket.current}
           gameID={gameID.current}
           onCancel={() => handleCancel()}>

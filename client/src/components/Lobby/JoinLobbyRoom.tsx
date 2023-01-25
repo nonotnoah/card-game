@@ -8,12 +8,14 @@ import Lobby from './Lobby'
 import PlayersColumn from './PlayersColumn'
 import TowerGame from '../Game/TowerGame'
 import Podium from './Podium'
+import TimeSyncClient from '../../utils/timesync'
 
 interface MySocket extends Socket {
   [key: string]: any
 }
 interface LobbyProps {
   children: never[] // ???????
+  timesync: TimeSyncClient | undefined
   socket: MySocket
   gameID: string
   onCancel: () => void
@@ -45,7 +47,7 @@ interface Podium {
 const URL: string = 'http://localhost:5000'
 
 // export default function JoinLobbyRoom({ socket, gameID, onCancel }: LobbyProps) {
-export default function JoinLobbyRoom({ socket, gameID, onCancel }: LobbyProps) {
+export default function JoinLobbyRoom({ timesync, socket, gameID, onCancel }: LobbyProps) {
   const [showPodium, setShowPodium] = useState(false)
   const [podium, setPodium] = useState({} as Podium)
   const [waitingForPlayers, setWaitingForPlayers] = useState(true)
@@ -143,10 +145,10 @@ export default function JoinLobbyRoom({ socket, gameID, onCancel }: LobbyProps) 
             />
           </div >
         </div>
-      ) : gameStarted ? (
-        <TowerGame numSymbols={size.symbol} initEvent='reconnect' socket={socket} />
-      ) : (
-        <TowerGame numSymbols={size.symbol} socket={socket} />
+      // ) : gameStarted ? (
+      //   <TowerGame numSymbols={size.symbol} initEvent='reconnect' socket={socket} />
+      ) : (timesync) && (
+        <TowerGame timesync={timesync} numSymbols={size.symbol} socket={socket} />
       )}
     </div >
   )

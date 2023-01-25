@@ -9,12 +9,14 @@ import SettingsColumn from "./SettingsColumn";
 import PlayersColumn from "./PlayersColumn";
 import TowerGame from "../Game/TowerGame";
 import Podium from "./Podium"
+import TimeSyncClient from "../../utils/timesync";
 
 interface MySocket extends Socket {
   [key: string]: any
 }
 interface LobbyProps {
   children: never[] // ???????
+  timesync: TimeSyncClient | undefined
   socket: MySocket
   gameID: string
   onCancel: () => void
@@ -43,7 +45,7 @@ interface Podium {
 }
 
 
-export default function HostLobbyRoom({ socket, gameID, onCancel }: LobbyProps) {
+export default function HostLobbyRoom({ timesync, socket, gameID, onCancel }: LobbyProps) {
   const [showPodium, setShowPodium] = useState(false)
   const [podium, setPodium] = useState({} as Podium)
   const [waitingForPlayers, setWaitingForPlayers] = useState(true);
@@ -52,6 +54,13 @@ export default function HostLobbyRoom({ socket, gameID, onCancel }: LobbyProps) 
     name: 'Normal: 57 cards',
     description: 'The standard experience'
   })
+  // console.log(timesync)
+  // setInterval(() => {
+  //   if (timesync) {
+  //     console.log(timesync.now())
+  //     console.log('offset', timesync.offset)
+  //   }
+  // }, 1000)
 
   const handleUsernameSubmit = (username: string) => { }
   // disconnect socket and call prop onCancel to get back to Lobbies.tsx
@@ -119,7 +128,7 @@ export default function HostLobbyRoom({ socket, gameID, onCancel }: LobbyProps) 
 
   return (
     <div className="wrapper">
-      <button style={{ zIndex: 100, width: '100px', position: "absolute"}} onClick={() => dev()}>ping</button>
+      {/* <button style={{ zIndex: 100, width: '100px', position: "absolute"}} onClick={() => dev()}>ping</button> */}
       {showPodium ? (
         <Podium
           onClose={() => handleClose()}
@@ -150,8 +159,10 @@ export default function HostLobbyRoom({ socket, gameID, onCancel }: LobbyProps) 
             />
           </div>
         </div>
+      ) : timesync ? (
+        <TowerGame timesync={timesync} numSymbols={size.symbol} socket={socket} />
       ) : (
-        <TowerGame numSymbols={size.symbol} socket={socket} />
+        <div>no ts</div>
       )}
     </div>
   );

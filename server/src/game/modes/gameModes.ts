@@ -132,6 +132,8 @@ export class TowerGame extends BasicGame {
    * figure out which guess game first
    */
   guessDecider = () => {
+    console.log(this.guessBuffer);
+    
     const earliestTime = Math.min.apply(Math, this.guessBuffer.map((guessObj) => {
       return guessObj.time
     }))
@@ -166,12 +168,15 @@ export class TowerGame extends BasicGame {
       }
       // expensive way to check if everyone guessed wrong
       this.checkFilter()
+      this.guessBuffer = []
     }
   }
 
-  guess = (guess: string, time: number, socket: MySocket) => {
+  guess = (guessO: {guess: string, time: number}, socket: MySocket) => {
+    console.log(guessO)
     // add guess to buffer
-    const guessObj: guess = { guess, time, socket }
+    const guessObj: guess = { ...guessO, socket }
+    // console.log(guessObj)
     this.guessBuffer.push(guessObj)
 
     // calculate guesses gathered in buffer over the last 1s

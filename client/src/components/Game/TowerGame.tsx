@@ -9,6 +9,7 @@ import Players from './Players'
 import { Suspense, lazy, useEffect, useState, ReactNode, useRef } from 'react'
 import { Socket } from 'socket.io-client'
 import GameState from '../../../../server/src/interfaces/GameState' // LOL
+import TimeSyncClient from '../../utils/timesync'
 
 const SymbolThemeL = lazy(() => import('./Styles/SymbolsL'))
 const SymbolThemeM = lazy(() => import('./Styles/SymbolsM'))
@@ -18,6 +19,7 @@ interface MySocket extends Socket {
   [key: string]: any;
 }
 interface TowerGameProps {
+  timesync: TimeSyncClient
   socket: MySocket;
   initEvent?: string
   numSymbols: number
@@ -27,7 +29,7 @@ interface CardObj {
   symbols: string[] | undefined
 }
 
-export default function TowerGame({ numSymbols, socket, initEvent }: TowerGameProps) {
+export default function TowerGame({ timesync, numSymbols, socket, initEvent }: TowerGameProps) {
   const [ready, setReady] = useState(false)
   const [countingDown, setCountingDown] = useState(false)
   const [count, setCount] = useState(0)
@@ -162,7 +164,11 @@ export default function TowerGame({ numSymbols, socket, initEvent }: TowerGamePr
 
   const handleGuess = (emoji: string) => {
     hasGuessed.current = true
-    socket.emit('guess', emoji, Date.now()) // TODO: send timestamp
+    // socket.emit('guess', emoji, Date.now()) // TODO: send timestamp
+    const guessObj = { guess: emoji, time: timesync.now()}
+    socket.emit('guess', guessObj)
+
+    console.log('guess', guessObj)
     // console.log('clicked', emoji)
     
   }

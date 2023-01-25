@@ -2,7 +2,7 @@ import { Socket } from 'socket.io-client'
 export default class TimeSyncClient {
   offset: number
   socket: Socket
-  loop: NodeJS.Timer
+  loop
   constructor(socket: Socket) {
     this.socket = socket
     this.offset = 0
