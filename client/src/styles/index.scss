@@ -37,19 +37,6 @@ h1 {
   line-height: 1.1;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
-}
-
 button {
   background-color: #464646;
   border: 2px solid #464646;;
@@ -62,4 +49,28 @@ button:hover {
 button:active {
   transition: .1s; 
   border: 2px solid #ffffff;;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  .host-btn {
+    color: black;
+  }
+  a:hover {
+    color: #747bff;
+  }
+  button {
+    background-color: #c9c9c9;
+    border: 2px solid #ffffff;
+  }
+  button:hover {
+    background-color: #d6d5d5;
+  }
+  button:active {
+    transition: .1s; 
+    background-color: #b6b6b6;
+  }
 }
