@@ -1,5 +1,6 @@
 # card-game
-Play it [here](https://noahs.website)
+Play it [here](https://noahs.website)!
+
 Online recreation of the Dobble/Spot It! card game
 
 This is a game where you match the emojis at the bottom of your screen with the ones in the center. 
