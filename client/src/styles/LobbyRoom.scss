@@ -27,16 +27,16 @@
   .room-code {
     padding: 12.5px;
     font-size: xx-large;
-    transition: .1s;
+    transition: 0.1s;
     border-radius: 10px;
-    outline: 0px solid #464646;;
+    outline: 0px solid #464646;
   }
   .room-code:hover {
-    outline: 2px solid #464646;;
+    outline: 2px solid #464646;
   }
   .room-code:active {
     background-color: #3d3d3d;
-    outline: 2px solid #ffffff;;
+    outline: 2px solid #ffffff;
   }
 }
 
@@ -73,7 +73,7 @@
   // width: 90%;
   height: 100%;
   margin: 0;
-  padding: 0; 
+  padding: 0;
   white-space: nowrap;
   li {
     display: inline-block;
@@ -149,4 +149,31 @@
 .cancel {
   height: 66%;
   width: 80%;
+}
+
+@media only screen and (max-width: 600px) {
+  
+  div {
+    border: 1px solid red;
+  }
+  .box {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    button {
+      height: 40px;
+      max-width: 200px;
+    }
+  }
+  .profile-wrapper,
+  .settings-wrapper {
+    height: 100%;
+    padding-top: 40px;
+  }
+  .settings-wrapper {
+    // padding-top: 100px;
+  }
+  .room-code-wrapper {
+
+  }
 }

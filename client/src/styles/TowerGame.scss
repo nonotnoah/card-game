@@ -246,3 +246,70 @@ div {
 //   animation-name: flash-gold;
 //   animation-duration: 1s;
 // }
+
+@media only screen and (max-width: 600px) {
+  
+  .my-emojis,
+  .my-emoji-wrapper {
+    height: 7rem;
+    // width: 12rem;
+  }
+  .my-emojis {
+    display: flex;
+    width: 70%;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .symbol-wrapper {
+    height:4rem;
+    // margin: 1rem;
+  }
+
+  .player-wrapper-lg {
+    top: 0;
+    width: 100%;
+  }
+  .player-wrapper-left {
+    // position: relative;
+    transform: translate(0%, 10%);
+    left: 0;
+    width: 50%;
+  }
+  .player-wrapper-right {
+    // position: relative;
+    transform: translate(0%, 10%);
+    right: 0;
+    width: 50%;
+  }
+  .player-wrapper {
+    padding: 10px
+  }
+  .player-emojis {
+    display: none;
+  }
+  .game-wrapper,
+  body {
+    overflow: hidden;
+  }
+}
+// .player-wrapper-right {
+//   position: absolute;
+//   width: 300px;
+//   height: 300px;
+//   transform: translate(-125%, 0%);
+//   margin: 0 auto;
+
+//   display: flex;
+//   flex-flow: column;
+//   justify-content: center;
+//   align-items: center;
+// }
+// .player-wrapper-right {
+//   transform: translate(125%, 0%);
+// }
+// .player-wrapper {
+//   padding: 10%;
+//   span {
+//     border-radius: 12px;
+//   }
+// }
